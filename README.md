@@ -52,8 +52,14 @@ composer run dev
 Perintah ini akan menjalankan:
 - Laravel server
 - Queue listener
-- Log watcher (pail)
 - Vite dev server
+
+Catatan:
+- Script `dev` sudah kompatibel Windows (tanpa `pail`).
+- Jika environment Anda support `pcntl` (umumnya Linux/macOS), bisa pakai:
+  ```bash
+  composer run dev:with-logs
+  ```
 
 ### Opsi 2: Jalankan terpisah
 Terminal 1:
