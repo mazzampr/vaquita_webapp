@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import heroImg from '../hero.png';
 
 // Lucide icons (only page-specific ones; component-level icons live in their own files)
@@ -27,6 +27,11 @@ import VFooter from '../components/ui/VFooter.vue';
 // ── Page Data ────────────────────────────────
 
 const coachContainer = ref(null);
+const statsSection = ref(null);
+const activeStudents = ref(0);
+const certifiedCoaches = ref(0);
+const parentSatisfaction = ref(0);
+let statsObserver = null;
 
 const packages = [
     {
@@ -97,6 +102,46 @@ const coaches = [
 const scrollCoach = (direction) => {
     coachContainer.value?.scrollBy({ left: direction * 300, behavior: 'smooth' });
 };
+
+const animateCount = (targetRef, endValue, duration = 1200) => {
+    const start = performance.now();
+
+    const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        targetRef.value = Math.round(endValue * progress);
+
+        if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+};
+
+const startStatsAnimation = () => {
+    animateCount(activeStudents, 500);
+    animateCount(certifiedCoaches, 10);
+    animateCount(parentSatisfaction, 98);
+};
+
+onMounted(() => {
+    statsObserver = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (!entry?.isIntersecting) return;
+
+            startStatsAnimation();
+            statsObserver?.disconnect();
+            statsObserver = null;
+        },
+        { threshold: 0.35 }
+    );
+
+    if (statsSection.value) statsObserver.observe(statsSection.value);
+});
+
+onBeforeUnmount(() => {
+    statsObserver?.disconnect();
+    statsObserver = null;
+});
 </script>
 
 <template>
@@ -107,7 +152,7 @@ const scrollCoach = (direction) => {
 
         <!-- Hero Section -->
         <section class="relative isolate overflow-hidden pt-32 pb-20 px-6 md:px-12 lg:px-24">
-            <div class="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-[#92f5d7] opacity-30 blob-shape -z-10"></div>
+            <div class="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-primary-soft opacity-30 blob-shape -z-10"></div>
             <div class="absolute bottom-0 left-[-5%] w-[300px] h-[300px] bg-primary-container opacity-40 blob-shape -z-10"></div>
 
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
@@ -157,19 +202,19 @@ const scrollCoach = (direction) => {
         </section>
 
         <!-- Stats Section -->
-        <section class="py-20">
+        <section ref="statsSection" class="py-20">
             <div class="max-w-7xl mx-auto px-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 text-center items-center">
                     <div class="flex flex-col items-center gap-3">
-                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">500+</span>
+                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">{{ activeStudents }}+</span>
                         <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">Siswa Aktif</p>
                     </div>
                     <div class="flex flex-col items-center gap-3 md:border-x border-slate-200 py-12 md:py-4">
-                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">10+</span>
+                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">{{ certifiedCoaches }}+</span>
                         <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">Pelatih Bersertifikat</p>
                     </div>
                     <div class="flex flex-col items-center gap-3">
-                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">98%</span>
+                        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-primary">{{ parentSatisfaction }}%</span>
                         <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">Orang Tua Puas</p>
                     </div>
                 </div>

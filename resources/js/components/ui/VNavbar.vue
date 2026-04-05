@@ -18,28 +18,33 @@ defineProps({
 </script>
 
 <template>
-    <header class="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8">
-        <nav class="mx-auto max-w-7xl bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] rounded-pill transition-all duration-300">
-            <div class="flex justify-between items-center px-6 py-3">
+    <header class="fixed top-0 left-0 right-0 z-50">
+        <nav class="w-full bg-white/80 backdrop-blur-lg shadow-sm">
+            <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
                 <!-- Logo -->
-                <a href="/" class="text-2xl font-bold text-primary tracking-tight flex-shrink-0">Vaquita</a>
+                <a href="/" class="text-2xl font-bold text-primary tracking-tight font-display flex-shrink-0">Vaquita</a>
 
                 <!-- Desktop Links -->
-                <div class="hidden md:flex flex-1 justify-center gap-10 items-center font-semibold">
+                <div class="hidden md:flex flex-1 justify-center gap-8 items-center font-display font-medium">
                     <a
                         v-for="link in links"
                         :key="link.label"
                         :href="link.href"
-                        class="text-slate-700 hover:text-primary transition-colors duration-300 text-sm"
+                        class="text-slate-600 hover:text-primary transition-colors duration-300"
                     >
                         {{ link.label }}
                     </a>
                 </div>
 
                 <!-- CTA Buttons -->
-                <div class="hidden md:flex flex-shrink-0 items-center gap-2">
-                    <VBtn variant="ghost" :to="{ name: 'login' }" size="md">Login</VBtn>
-                    <VBtn variant="primary" href="https://wa.me/6281510425560" external size="md">Daftar Sekarang</VBtn>
+                <div class="hidden md:flex flex-shrink-0 items-center gap-3">
+                    <router-link
+                        :to="{ name: 'login' }"
+                        class="text-slate-600 hover:text-primary transition-colors duration-300 font-medium"
+                    >
+                        Login
+                    </router-link>
+                    <VBtn variant="primary" href="https://wa.me/6281510425560" external size="md" class="!px-6 !py-2.5 !shadow-none">Daftar Sekarang</VBtn>
                 </div>
 
                 <!-- Mobile Menu -->
@@ -59,7 +64,7 @@ defineProps({
             leave-from-class="opacity-100 translate-y-0"
             leave-to-class="opacity-0 -translate-y-2"
         >
-            <div v-if="open" class="absolute left-4 right-4 top-[80px] bg-white rounded-2xl shadow-xl border border-slate-100 p-4 md:hidden">
+            <div v-if="open" class="absolute left-4 right-4 top-[84px] bg-white rounded-2xl shadow-xl border border-slate-100 p-4 md:hidden">
                 <div class="flex flex-col space-y-3 px-2">
                     <a
                         v-for="link in links"

@@ -35,22 +35,31 @@ description: Frontend design skill for Vaquita web application. Defines the visu
 
 All colors are registered in `tailwind.config.js`. **Never use raw hex values in templates** — always use Tailwind token names.
 
+```css
+:root{
+  --primary:#4AAF94;
+  --primary-soft:#AAD2C7;
+  --background:#FBFDFC;
+  --text:#111111;
+}
+```
+
 | Token                | Hex        | Tailwind Class        | Usage                                         |
 | -------------------- | ---------- | --------------------- | --------------------------------------------- |
-| `primary`            | `#006b56`  | `text-primary`        | CTAs, headings, brand accent, sidebar active  |
-| `primary-soft`       | `#4aaf94`  | `bg-primary-soft`     | Gradient endpoints, icon backgrounds, hover   |
-| `primary-container`  | `#c2ebe0`  | `bg-primary-container`| Card hover states, subtle backgrounds, tags   |
-| `surface`            | `#f8faf9`  | `bg-surface`          | Page background                                |
+| `primary`            | `#4AAF94`  | `text-primary`        | CTAs, headings, brand accent, sidebar active  |
+| `primary-soft`       | `#AAD2C7`  | `bg-primary-soft`     | Gradient endpoints, icon backgrounds, hover   |
+| `primary-container`  | `#AAD2C7`  | `bg-primary-container`| Card hover states, subtle backgrounds, tags   |
+| `surface`            | `#FBFDFC`  | `bg-surface`          | Page background                                |
 | `surface-alt`        | `#f2f4f3`  | `bg-surface-alt`      | Section alternation, sidebar, table rows      |
 | `accent-rose`        | `#994158`  | `text-accent-rose`    | Badges, pricing highlights, alerts            |
 | `accent-pink`        | `#e67f96`  | `bg-accent-pink`      | Safety badge, warm accent                     |
-| `ink`                | `#191c1c`  | `text-ink`            | Body text, headings                            |
+| `ink`                | `#111111`  | `text-ink`            | Body text, headings                            |
 
 ### Gradient
 
 ```css
 /* hero-gradient — defined globally in app.css */
-background: linear-gradient(135deg, #006b56 0%, #4aaf94 100%);
+background: linear-gradient(135deg, #4AAF94 0%, #AAD2C7 100%);
 ```
 
 ### Color Usage Rules
@@ -290,3 +299,4 @@ Before merging any UI work:
 - [ ] Visual tested on mobile (375px) and desktop (1440px)
 - [ ] Hover states present on all interactive elements
 - [ ] Accessible focus states on interactive elements
+

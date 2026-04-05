@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --primary: #4AAF94;
+    --primary-soft: #AAD2C7;
+    --background: #FBFDFC;
+    --text: #111111;
+}
+
 /* ───────────────────────────────────────────
    Base
    ─────────────────────────────────────────── */
@@ -14,8 +21,8 @@
 
     body {
         font-family: 'Be Vietnam Pro', sans-serif;
-        color: #191c1c;
-        background-color: #f8faf9;
+        color: var(--text);
+        background-color: var(--background);
     }
 }
 
@@ -30,7 +37,7 @@
 
     /* Primary-to-soft gradient for hero CTA and accent surfaces */
     .hero-gradient {
-        background: linear-gradient(135deg, #006b56 0%, #4aaf94 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
     }
 }
 

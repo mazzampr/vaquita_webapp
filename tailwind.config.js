@@ -13,19 +13,19 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#006b56',
-                    soft: '#4aaf94',
-                    container: '#c2ebe0',
+                    DEFAULT: '#4AAF94',
+                    soft: '#AAD2C7',
+                    container: '#AAD2C7',
                 },
                 surface: {
-                    DEFAULT: '#f8faf9',
+                    DEFAULT: '#FBFDFC',
                     alt: '#f2f4f3',
                 },
                 accent: {
                     rose: '#994158',
                     pink: '#e67f96',
                 },
-                ink: '#191c1c',
+                ink: '#111111',
             },
             fontFamily: {
                 sans: ['Be Vietnam Pro', ...defaultTheme.fontFamily.sans],
