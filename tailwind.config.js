@@ -11,8 +11,30 @@ export default {
     ],
     theme: {
         extend: {
+            colors: {
+                primary: {
+                    DEFAULT: '#006b56',
+                    soft: '#4aaf94',
+                    container: '#c2ebe0',
+                },
+                surface: {
+                    DEFAULT: '#f8faf9',
+                    alt: '#f2f4f3',
+                },
+                accent: {
+                    rose: '#994158',
+                    pink: '#e67f96',
+                },
+                ink: '#191c1c',
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Be Vietnam Pro', ...defaultTheme.fontFamily.sans],
+                display: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
+            },
+            borderRadius: {
+                pill: '9999px',
+                card: '1rem',
+                'card-lg': '2rem',
             },
         },
     },

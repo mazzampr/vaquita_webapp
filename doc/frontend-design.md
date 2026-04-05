@@ -1,226 +1,292 @@
 ---
 name: frontend-design
-description: Frontend Designer-Engineer untuk eksekusi UI production-grade yang distinctive, intentional, functional, dan memorable. Gunakan saat diminta mendesain/mengimplementasikan antarmuka web yang harus terasa authored (bukan template), dengan sistem visual jelas, kualitas kode tinggi, dan diferensiasi kuat.
+description: Frontend design skill for Vaquita web application. Defines the visual system, design tokens, component architecture, and coding rules to follow when building any UI — landing pages, dashboards, admin panels, or new features.
 ---
 
-# Frontend Design Skill
+# Frontend Design Skill — Vaquita
 
-## Identity
-- Name: `frontend-design`
-- Role: Frontend Designer-Engineer
-- Mode: Production-grade UI execution (not layout generation)
+> This document is the **single source of truth** for all frontend UI decisions in the Vaquita web application.
+> Every page, component, and feature must follow the principles, tokens, and rules defined here.
 
-## 0. Operating Principle
-- Jangan sekadar generate UI.
-- Rancang dan implementasikan visual system yang:
-  - Distinctive
-  - Intentional
-  - Functional
-  - Memorable
-- Jika output terasa template, anggap gagal dan redesign.
+---
 
-## 1. Core Mandate
-Setiap output wajib memenuhi:
+## 1. Operating Principle
 
-### 1.1 Intentional Aesthetic Direction
-Tentukan satu arah estetika yang jelas dan bernama, contoh:
-- Editorial Brutalism
-- Industrial Utilitarian
-- Luxury Minimal
-- Retro-Futurist Interface
+- Don't just generate UI. Design and implement a visual system that is **distinctive**, **intentional**, **functional**, and **memorable**.
+- If the output feels like a generic template, it has failed. Redesign.
+- Every element must serve a purpose: conversion, clarity, or trust.
 
-### 1.2 Technical Integrity
-- Kode harus fully working
-- Semantic HTML
-- Struktur bersih
-- Tanpa style tidak terpakai
+---
 
-### 1.3 Visual Memorability
-Wajib ada minimal satu anchor kuat:
-- Layout break yang unik
-- Treatment tipografi
-- Interaction pattern khas
-- Texture/layering yang intentional
+## 2. Design Direction
 
-### 1.4 Cohesive Restraint
-- Jangan dekorasi random
-- Tiap elemen harus mendukung arah estetika
+| Attribute         | Value                                                              |
+| ----------------- | ------------------------------------------------------------------ |
+| **Aesthetic**     | Organic Professional — clean, warm, trustworthy                    |
+| **Purpose**       | Persuasive (public) · Functional (dashboard/admin)                 |
+| **Tone**          | Organic (primary) · Playful (secondary)                            |
+| **Visual Anchor** | Blob-shaped frames + floating pill navigation + teal color system  |
 
-## 2. DFII (Design Feasibility & Impact Index)
-Dimensi penilaian:
-- Impact: visual distinctiveness
-- Fit: context suitability
-- Feasibility: ease of implementation
-- Performance: speed + accessibility
-- Risk: consistency difficulty
+> "If the logo were removed, the organic blob shapes and warm teal palette would still make the UI instantly recognizable as Vaquita."
 
-Formula:
-`DFII = (Impact + Fit + Feasibility + Performance) - Risk`
+---
 
-Keputusan:
-- `12-15`: Execute fully
-- `8-11`: Proceed
-- `4-7`: Reduce scope
-- `<=3`: Rethink
+## 3. Color System
 
-## 3. Mandatory Design Thinking Phase
-Sebelum coding, wajib definisikan:
+All colors are registered in `tailwind.config.js`. **Never use raw hex values in templates** — always use Tailwind token names.
 
-### 3.1 Purpose
-Pilih tujuan utama interface:
-- Persuasive
-- Functional
-- Exploratory
-- Expressive
+| Token                | Hex        | Tailwind Class        | Usage                                         |
+| -------------------- | ---------- | --------------------- | --------------------------------------------- |
+| `primary`            | `#006b56`  | `text-primary`        | CTAs, headings, brand accent, sidebar active  |
+| `primary-soft`       | `#4aaf94`  | `bg-primary-soft`     | Gradient endpoints, icon backgrounds, hover   |
+| `primary-container`  | `#c2ebe0`  | `bg-primary-container`| Card hover states, subtle backgrounds, tags   |
+| `surface`            | `#f8faf9`  | `bg-surface`          | Page background                                |
+| `surface-alt`        | `#f2f4f3`  | `bg-surface-alt`      | Section alternation, sidebar, table rows      |
+| `accent-rose`        | `#994158`  | `text-accent-rose`    | Badges, pricing highlights, alerts            |
+| `accent-pink`        | `#e67f96`  | `bg-accent-pink`      | Safety badge, warm accent                     |
+| `ink`                | `#191c1c`  | `text-ink`            | Body text, headings                            |
 
-### 3.2 Tone (maks 2)
-Pilih 1 dominan dari:
-- Brutalist
-- Editorial
-- Luxury
-- Retro-futurist
-- Industrial
-- Organic
-- Playful
-- Maximalist
-- Minimalist
-
-### 3.3 Differentiation Anchor
-Jawab jelas:
-"Jika logo dihapus, apa yang membuat UI ini tetap recognizable?"
-
-Anchor ini harus terlihat nyata di output.
-
-## 4. Design System Rules
-
-### 4.1 Typography
-Forbidden:
-- Inter
-- Roboto
-- Arial
-- Default system fonts
-
-Required:
-- 1 display font (berkarakter kuat)
-- 1 body font (netral penopang)
-
-Tipografi harus membentuk hierarchy dengan jelas.
-
-### 4.2 Color System
-Gunakan CSS variables.
+### Gradient
 
 ```css
-:root {
-  --color-base: #f3ecec;
-  --color-primary: #ff3c00;
-  --color-accent: #ffd500;
-  --color-muted: #888;
-}
+/* hero-gradient — defined globally in app.css */
+background: linear-gradient(135deg, #006b56 0%, #4aaf94 100%);
 ```
 
-Rules:
-- 1 dominant tone
-- 1 accent
-- 1 neutral system
-- Hindari palette terlalu seimbang yang terasa generik
+### Color Usage Rules
 
-### 4.3 Layout & Space
-- Break symmetry secara intentional
-- Pilih salah satu: negative space atau density
-- Hindari layout terlalu grid-perfect kecuali memang dibutuhkan oleh tone
+1. **Public pages** (landing, pricing): Use the full palette — primary, blobs, gradients
+2. **Dashboard/admin**: Use `surface`, `surface-alt`, `primary` for accents. Keep it calm and functional.
+3. **Destructive actions**: Use `accent-rose` for delete buttons, error states
+4. **Success states**: Use `primary-soft` for positive feedback
+5. **Neutral UI**: Use Tailwind's `slate-*` scale for borders, muted text, dividers
 
-### 4.4 Motion
-Motion harus:
-- Purposeful
-- Minimal
-- High-impact
+---
 
-Allowed:
-- Satu entrance animation
-- Hover state terkontrol
+## 4. Typography
 
-Avoid:
+| Role        | Font                | Weights    | Tailwind Class  | Usage                           |
+| ----------- | ------------------- | ---------- | --------------- | ------------------------------- |
+| **Body**    | Be Vietnam Pro      | 300–800    | `font-sans`     | All body text, UI labels, forms |
+| **Display** | Plus Jakarta Sans   | 400–800    | `font-display`  | Hero headings, section titles   |
+
+### Rules
+
+- Fonts are imported **once** in `resources/css/app.css`. Never import Google Fonts in Vue components.
+- **Forbidden fonts**: Inter, Roboto, Arial, system defaults — these make the UI look generic.
+- Headings hierarchy: `text-7xl` (hero) → `text-5xl` (section) → `text-xl` (card) → `text-lg` (subsection).
+- Always pair font size with appropriate `leading-*` and `tracking-*`.
+
+---
+
+## 5. Component Architecture
+
+### 5.1 Directory Structure
+
+```
+resources/js/components/
+└── ui/                    ← Shared, design-system-level components
+    ├── VBtn.vue           ← Universal button / link
+    ├── VBadge.vue         ← Pill badge label
+    ├── VNavbar.vue        ← Floating pill navbar
+    ├── VTestimonialCard.vue
+    ├── VPricingCard.vue
+    ├── VCoachCard.vue
+    └── VFooter.vue
+```
+
+When building **new features** (dashboard, admin), add components to the appropriate directory:
+
+```
+resources/js/components/
+├── ui/                    ← Design-system primitives (shared everywhere)
+├── dashboard/             ← Dashboard-specific composed components
+└── admin/                 ← Admin-specific composed components
+```
+
+### 5.2 Component Catalog
+
+#### VBtn — Universal Button
+
+The **single source of truth** for every CTA, action button, and link across the entire app.
+
+```vue
+<VBtn variant="primary" href="#harga" size="lg">Lihat Paket</VBtn>
+<VBtn variant="outline" :to="{ name: 'login' }">Login</VBtn>
+<VBtn variant="ghost" :to="{ name: 'settings' }">Settings</VBtn>
+<VBtn variant="white" href="https://wa.me/..." external>Hubungi</VBtn>
+```
+
+| Prop       | Type             | Default     | Values                                  |
+| ---------- | ---------------- | ----------- | --------------------------------------- |
+| `variant`  | String           | `'primary'` | `primary`, `outline`, `ghost`, `white`  |
+| `size`     | String           | `'md'`      | `sm`, `md`, `lg`                        |
+| `href`     | String           | `null`      | Renders as `<a>`                        |
+| `to`       | String / Object  | `null`      | Renders as `<router-link>`              |
+| `external` | Boolean          | `false`     | Adds `target="_blank"` when using `href`|
+
+> **Rule**: Never use raw `<a>` or `<button>` for actions. Always use `<VBtn>`.
+
+#### VBadge — Pill Label
+
+```vue
+<VBadge>Label Text</VBadge>
+<VBadge color="rose">BEST SELLER</VBadge>
+```
+
+#### VNavbar, VFooter — Page Shell
+
+Used on all public-facing pages. Accept `links` prop for data-driven navigation.
+
+#### VTestimonialCard, VPricingCard, VCoachCard — Domain Cards
+
+Accept data via props, handle their own layout internally.
+
+### 5.3 Creating New Components
+
+When you need a new UI element:
+
+1. **Check if an existing component can be extended** (e.g., add a new `variant` to VBtn)
+2. **If new**: create in `components/ui/` with the `V` prefix
+3. **Props in, events out** — components never fetch data or manage routes
+4. **Use Tailwind tokens** — never hardcode colors or spacing
+5. **No `<style>` blocks** unless absolutely necessary for encapsulation
+
+---
+
+## 6. Page Architecture Rules
+
+### No `<style>` Blocks in Page Components
+
+All styling comes from:
+- Tailwind utility classes in templates
+- Global utilities in `app.css` (`blob-shape`, `hero-gradient`, `hide-scrollbar`)
+- Tailwind config tokens (`primary`, `surface-alt`, `rounded-card-lg`)
+
+### Data Stays in Pages
+
+Pages own the data (in `<script setup>`) and pass it to components via props. Components are pure presentational.
+
+### File Organization
+
+```
+resources/js/pages/
+├── LandingPage.vue        ← Public: marketing/conversion
+├── LoginPage.vue          ← Auth
+├── PortalPage.vue         ← Authenticated: student portal
+├── DashboardPage.vue      ← Future: admin dashboard
+└── ...
+```
+
+---
+
+## 7. Icon Policy
+
+- **Library**: `lucide-vue-next` — the only allowed icon source
+- **Import per-component**: only import the icons you need (tree-shaking)
+- **Never** use inline `<svg>` elements in templates
+- **Never** use emoji as UI icons (looks unprofessional)
+
+```vue
+import { ArrowRight, ShieldCheck } from 'lucide-vue-next';
+```
+
+---
+
+## 8. Layout Patterns
+
+### Public Pages (Landing, Pricing, About)
+
+| Pattern               | Implementation                                              |
+| --------------------- | ------------------------------------------------------------ |
+| Floating pill navbar  | `VNavbar` — `bg-white/70 backdrop-blur-xl rounded-pill`     |
+| Blob decorations      | `.blob-shape` class on absolutely positioned `div`s         |
+| Section alternation   | `bg-surface` → `bg-surface-alt` → `bg-white` rhythm        |
+| Hero split layout     | `flex flex-col md:flex-row` with 60/40 text-image split     |
+| Pre-footer CTA card   | Full-width rounded card with gradient + image overlay        |
+
+### Dashboard / Admin Pages
+
+| Pattern               | Implementation                                               |
+| --------------------- | ------------------------------------------------------------ |
+| Sidebar navigation    | Fixed left, `bg-surface-alt`, active state = `text-primary`  |
+| Content area          | `bg-white rounded-card-lg shadow-sm` cards in grid           |
+| Data tables           | Alternating `bg-surface-alt` rows, `border-slate-100`        |
+| Form inputs           | `border border-slate-200 rounded-card` with focus ring       |
+| Action buttons        | `<VBtn variant="primary" size="sm">` in toolbars             |
+| Status badges         | `<VBadge color="primary">Active</VBadge>`                    |
+
+---
+
+## 9. Motion Rules
+
+| Type              | Where                              | Duration  | Easing        |
+| ----------------- | ---------------------------------- | --------- | ------------- |
+| Hover scale       | Buttons, CTAs                      | 150ms     | ease-out      |
+| Hover lift        | Cards (`-translate-y-2`)           | 300ms     | ease-out      |
+| Grayscale toggle  | Coach cards                        | 500ms     | ease-in-out   |
+| Dropdown enter    | Mobile nav (Vue `<Transition>`)    | 200ms     | ease-out      |
+| Dropdown leave    | Mobile nav                         | 150ms     | ease-in       |
+| Smooth scroll     | Carousel `scrollBy()`             | native    | —             |
+
+### Motion Anti-Patterns (Forbidden)
+
 - Micro-animation spam
+- Loading spinners on static content
+- Parallax scrolling
+- Auto-playing carousels
+- Bounce animations on important content
 
-### 4.5 Depth & Texture
-Gunakan hanya jika sejalan tone:
-- Grain overlay
-- Glass layers
-- Hard shadows
-- Custom borders
+---
 
-## 5. Implementation Standard
+## 10. Responsive Breakpoints
 
-### Code Quality
-- Modular
-- Tidak duplikasi
-- Tidak dead CSS
-- Accessible (focus state + contrast)
+Follow Tailwind defaults: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px).
 
-### Tech Preference
-- Tailwind CSS (utility-first, design token lewat `tailwind.config`)
-- JS minimal
-- Framework hanya jika dibutuhkan
+| Breakpoint | Landing Page Behavior                                         |
+| ---------- | ------------------------------------------------------------- |
+| Mobile     | Single column, stacked hero, hamburger nav, full-width cards  |
+| Tablet+    | Two-column hero, horizontal pricing grid, pill navbar visible |
+| Desktop    | Max-width `7xl` (1280px) container, 4-col pricing grid       |
 
-### Complexity Matching
-- Minimalist design -> spacing dan hierarchy presisi
-- Maximalist design -> layer dan motion terkurasi
+---
 
-Mismatch design-vs-code = failure.
+## 11. Accessibility Baseline
 
-## 6. Required Output Format
+- All interactive elements must have visible `:focus` states
+- Color contrast: minimum WCAG AA (4.5:1 for text)
+- All images need descriptive `alt` text
+- Buttons must have clear labels (not just icons)
+- Keyboard-navigable: tabs, enter, escape for dropdowns
 
-### 6.1 Design Direction Summary
-- Nama aesthetic
-- DFII score
-- Konsep inspirasi
+---
 
-### 6.2 Design System Snapshot
-- Font + alasan
-- Color variables
-- Spacing logic
-- Motion rules
+## 12. Anti-Patterns (Forbidden)
 
-### 6.3 Implementation
-- Full working code
-- Struktur bersih
-- Komentar minimal
+- Inter / Roboto / Arial fonts
+- Raw hex colors in templates
+- Inline SVGs instead of Lucide components
+- Emoji as functional icons
+- `<style>` blocks in page components
+- Duplicated button/link markup (use `<VBtn>`)
+- Tailwind default look without design token customization
+- Symmetrical generic landing page layouts
+- Component-first development without understanding the design direction
+- Random decorative animations
 
-### 6.4 Differentiation Callout
-Wajib tulis eksplisit:
-"UI ini menghindari generic pattern dengan melakukan X, bukan Y."
+---
 
-## 7. Anti-Patterns (Strictly Forbidden)
-- Inter / Roboto / Arial
-- Tailwind default look
-- Symmetrical landing page generik
-- SaaS gradient cliche
-- Component-first tanpa direction design
-- Random animations
-- Template-like UI
+## 13. Development Checklist
 
-## 8. Design Philosophy
-Bangun:
-- Visual identity
-- System yang scalable
-- Frontend yang terasa authored
+Before merging any UI work:
 
-Bukan output yang terasa generated.
-
-## 9. Operator Checklist
-Sebelum final:
-- [ ] Aesthetic terdefinisi jelas
-- [ ] DFII >= 8
-- [ ] Ada 1 visual anchor kuat
-- [ ] Tidak ada generic UI patterns
-- [ ] Kode sesuai ambisi visual
-- [ ] Accessible dan performant
-
-## 10. Execution Rule
-Jika output terlihat seperti:
-- Dribbble template
-- Tailwind UI kit
-- AI-generated landing page generik
-
-Maka: discard dan redesign.
-
+- [ ] No raw hex values in templates (use Tailwind token names)
+- [ ] No inline SVGs (use Lucide components)
+- [ ] No Google Font imports in Vue files (global `app.css` only)
+- [ ] No `<style>` blocks in page files
+- [ ] All CTAs use `<VBtn>` (not raw `<a>` or `<button>`)
+- [ ] Colors come from `tailwind.config.js` tokens
+- [ ] New component follows `V` naming prefix, lives in `components/ui/`
+- [ ] Visual tested on mobile (375px) and desktop (1440px)
+- [ ] Hover states present on all interactive elements
+- [ ] Accessible focus states on interactive elements
