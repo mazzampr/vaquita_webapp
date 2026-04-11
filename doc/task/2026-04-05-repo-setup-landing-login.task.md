@@ -2,8 +2,9 @@
 
 ## 0. Metadata Singkat
 - Feature ID: `FEAT-026`
+- Task Log ID: `2026-04-05-repo-setup-landing-login`
 - Prioritas: `High`
-- Status: `In Progress`
+- Status: `Done`
 - Owner: -
 
 ## 1. Ringkasan Task
@@ -149,3 +150,10 @@
 - Kode final lengkap
 - Penjelasan singkat keputusan teknis
 - Catatan asumsi
+
+## 9. Log Pengerjaan
+### 2026-04-05
+- Status: `Done`
+- Perubahan: Fondasi project, landing page, login API, Vue, dan PWA dasar selesai.
+- Test/check: Backend dan frontend check relevan untuk login, landing, dan auth state sudah ditandai selesai di checklist task.
+- Catatan: Task ini menjadi fondasi awal sebelum fitur operasional lanjutan.
