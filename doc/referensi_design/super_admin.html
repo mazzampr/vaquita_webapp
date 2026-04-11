@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaquita — Super Admin Dashboard</title>
+<meta name="description" content="Super Admin Dashboard untuk Les Renang Vaquita. Kelola siswa, pelatih, jadwal, keuangan, dan seluruh operasional.">
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" onload="window.lucideLoaded=true; if(window.initLucide) window.initLucide();"></script>
+<script>
+  window.initLucide = function() { if(window.lucide) lucide.createIcons(); };
+  document.addEventListener('DOMContentLoaded', function() { if(window.lucideLoaded) window.initLucide(); });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style type="text/tailwindcss">
+  :root {
+    --primary: #4AAF94;
+    --primary-hover: #3B9A80;
+    --primary-soft: #AAD2C7;
+    --primary-light: #E8F5F0;
+    --background: #FBFDFC;
+    --foreground: #111111;
+    --secondary: #6B7A8D;
+    --muted: #F0F4F2;
+    --border: #E8ECE9;
+    --card-grey: #F4F7F5;
+    --success: #30B22D;
+    --success-light: #DCFCE7;
+    --error: #ED6B60;
+    --error-light: #FEE2E2;
+    --warning: #F5A623;
+    --warning-light: #FEF3C7;
+    --font-sans: 'Lexend Deca', sans-serif;
+  }
+  @theme inline {
+    --color-primary: var(--primary);
+    --color-primary-hover: var(--primary-hover);
+    --color-primary-soft: var(--primary-soft);
+    --color-primary-light: var(--primary-light);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-secondary: var(--secondary);
+    --color-muted: var(--muted);
+    --color-border: var(--border);
+    --color-card-grey: var(--card-grey);
+    --color-success: var(--success);
+    --color-success-light: var(--success-light);
+    --color-error: var(--error);
+    --color-error-light: var(--error-light);
+    --color-warning: var(--warning);
+    --color-warning-light: var(--warning-light);
+    --font-sans: var(--font-sans);
+    --radius-card: 20px;
+    --radius-button: 50px;
+    --radius-icon: 12px;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .sidebar-link { @apply flex items-center rounded-xl px-4 py-3 gap-3 cursor-pointer transition-all duration-200; }
+  .sidebar-link:hover { @apply bg-muted; }
+  .sidebar-link.active { @apply bg-primary-light font-semibold; }
+  .sidebar-link.active .sidebar-icon { @apply text-primary; }
+  .sidebar-link.active .sidebar-label { @apply text-foreground font-semibold; }
+  .sidebar-icon { @apply size-5 text-secondary transition-colors duration-200; }
+  .sidebar-label { @apply text-sm font-medium text-secondary transition-colors duration-200; }
+  .sidebar-link:hover .sidebar-icon { @apply text-foreground; }
+  .sidebar-link:hover .sidebar-label { @apply text-foreground; }
+  .submenu-container { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .submenu-container.open { max-height: 600px; }
+  .stat-card { @apply flex flex-col rounded-2xl border border-border p-5 gap-3 bg-white hover:shadow-md hover:border-primary-soft transition-all duration-300 cursor-default; }
+  .content-section { @apply hidden; }
+  .content-section.active { @apply block; }
+  .table-container { @apply w-full overflow-x-auto rounded-2xl border border-border bg-white; }
+  .data-table { @apply w-full text-sm; }
+  .data-table thead { @apply bg-muted; }
+  .data-table th { @apply text-left px-5 py-3.5 font-semibold text-secondary text-xs uppercase tracking-wider; }
+  .data-table td { @apply px-5 py-4 text-foreground border-t border-border; }
+  .data-table tbody tr:hover { @apply bg-primary-light/30; }
+  .badge { @apply text-xs font-bold px-2 py-0.5 rounded-full; }
+  .badge-success { @apply bg-success-light text-success; }
+  .badge-error { @apply bg-error-light text-error; }
+  .badge-warning { @apply bg-warning-light text-warning; }
+  .badge-primary { @apply bg-primary-light text-primary; }
+  .badge-muted { @apply bg-muted text-secondary; }
+  .btn-primary { @apply px-5 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary-hover transition-all duration-200 cursor-pointer text-sm; }
+  .btn-outline { @apply px-5 py-2.5 bg-white text-foreground rounded-xl font-medium border border-border hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer text-sm; }
+  .page-title { @apply font-bold text-2xl text-foreground mb-1; }
+  .page-subtitle { @apply text-secondary text-sm mb-6; }
+  .card { @apply rounded-2xl border border-border p-6 bg-white; }
+  .input-field { @apply w-full px-4 py-2.5 rounded-xl border border-border bg-white text-sm text-foreground placeholder:text-secondary/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200; }
+  .select-field { @apply w-full px-4 py-2.5 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 cursor-pointer; }
+  .label-field { @apply block text-sm font-medium text-foreground mb-1.5; }
+
+  /* Modal */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#fff;border-radius:1.25rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.15);animation:modalIn 0.25s ease; }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+  /* Calendar */
+  .cal-scroll { overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:1rem;border:1px solid #E8ECE9; }
+  .cal-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#E8ECE9;min-width:660px; }
+  .cal-header { background:#F3F6F4;padding:0.5rem;text-align:center;font-weight:600;font-size:0.75rem;color:#6B7A8D;text-transform:uppercase;letter-spacing:0.05em; }
+  .cal-cell { background:#fff;min-height:110px;padding:0.35rem;position:relative;cursor:pointer;transition:background 0.15s; }
+  .cal-cell:hover { background:#F8FDFB; }
+  .cal-cell.today { background:#F0FAF6; }
+  .cal-cell.other-month { background:#FAFBFA; }
+  .cal-cell.other-month .cal-date { color:#C0C8CC; }
+  .cal-date { font-size:0.75rem;font-weight:600;color:#6B7A8D;padding:2px 6px;border-radius:999px;display:inline-block;margin-bottom:2px; }
+  .cal-cell.today .cal-date { background:#4AAF94;color:#fff; }
+  .cal-event { font-size:0.65rem;padding:3px 5px;border-radius:6px;margin-bottom:2px;cursor:pointer;transition:all 0.15s;line-height:1.3;position:relative;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; }
+  .cal-event:hover { filter:brightness(0.95);transform:scale(1.02); }
+  .cal-event.coach-rina { background:#E0F5EE;color:#2D8B6F;border-left:3px solid #4AAF94; }
+  .cal-event.coach-budi { background:#FFF3E0;color:#C77D1A;border-left:3px solid #F5A623; }
+  .cal-event.coach-dian { background:#E8F4FD;color:#2B7AB5;border-left:3px solid #42A5F5; }
+  .cal-event.coach-arif { background:#F3E5F5;color:#8E24AA;border-left:3px solid #AB47BC; }
+  .cal-more { font-size:0.6rem;color:#4AAF94;font-weight:600;cursor:pointer;padding:1px 5px; }
+  .cal-more:hover { text-decoration:underline; }
+  @media(max-width:768px) {
+    .cal-cell { min-height:80px;padding:0.25rem; }
+    .cal-header { padding:0.35rem;font-size:0.65rem; }
+    .cal-date { font-size:0.65rem;padding:1px 4px; }
+    .cal-event { font-size:0.6rem;padding:2px 3px;border-left-width:2px;margin-bottom:1px; }
+    .cal-more { font-size:0.55rem; }
+    .cal-grid { min-width:580px; }
+  }
+</style>
+</head>
+<body class="font-sans bg-background min-h-screen overflow-x-hidden">
+
+<!-- Mobile Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+<div class="flex h-screen max-h-screen flex-1 overflow-hidden">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="flex flex-col w-[272px] shrink-0 h-screen fixed inset-y-0 left-0 z-50 bg-white border-r border-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 overflow-hidden">
+    <!-- Logo -->
+    <div class="flex items-center justify-between border-b border-border h-[72px] px-5 gap-3 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+          <i data-lucide="waves" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight text-foreground">Vaquita</h1>
+          <p class="text-[10px] text-secondary font-medium leading-tight">Super Admin</p>
+        </div>
+      </div>
+      <button onclick="toggleSidebar()" class="lg:hidden size-9 flex shrink-0 bg-white rounded-xl items-center justify-center ring-1 ring-border hover:ring-primary transition-all duration-300 cursor-pointer">
+        <i data-lucide="x" class="size-5 text-secondary"></i>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex flex-col p-4 pb-24 gap-1 overflow-y-auto flex-1 scrollbar-hide">
+      <!-- Dashboard -->
+      <a onclick="navigateTo('dashboard')" class="sidebar-link active" data-page="dashboard">
+        <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+        <span class="sidebar-label">Dashboard</span>
+      </a>
+
+      <!-- Manajemen Siswa -->
+      <div>
+        <button onclick="toggleSubmenu('siswa')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="users" class="sidebar-icon"></i>
+            <span class="sidebar-label">Manajemen Siswa</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="bg-error text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
+            <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-siswa"></i>
+          </div>
+        </button>
+        <div class="submenu-container" id="submenu-siswa">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <a onclick="navigateTo('daftar-siswa')" class="sidebar-link" data-page="daftar-siswa">
+              <i data-lucide="list" class="sidebar-icon"></i><span class="sidebar-label">Daftar Siswa</span>
+            </a>
+            <a onclick="navigateTo('pendaftar-baru')" class="sidebar-link" data-page="pendaftar-baru">
+              <i data-lucide="user-plus" class="sidebar-icon"></i><span class="sidebar-label">Pendaftar Baru</span>
+              <span class="bg-error text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto">3</span>
+            </a>
+            <a onclick="navigateTo('paket-langganan')" class="sidebar-link" data-page="paket-langganan">
+              <i data-lucide="package" class="sidebar-icon"></i><span class="sidebar-label">Paket Langganan</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manajemen Pelatih -->
+      <div>
+        <button onclick="toggleSubmenu('pelatih')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="life-buoy" class="sidebar-icon"></i>
+            <span class="sidebar-label">Manajemen Pelatih</span>
+          </div>
+          <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-pelatih"></i>
+        </button>
+        <div class="submenu-container" id="submenu-pelatih">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <a onclick="navigateTo('daftar-pelatih')" class="sidebar-link" data-page="daftar-pelatih">
+              <i data-lucide="contact" class="sidebar-icon"></i><span class="sidebar-label">Daftar Pelatih</span>
+            </a>
+            <a onclick="navigateTo('rekap-kehadiran')" class="sidebar-link" data-page="rekap-kehadiran">
+              <i data-lucide="calendar-check" class="sidebar-icon"></i><span class="sidebar-label">Rekap Kehadiran</span>
+            </a>
+            <a onclick="navigateTo('potongan-gaji')" class="sidebar-link" data-page="potongan-gaji">
+              <i data-lucide="scissors" class="sidebar-icon"></i><span class="sidebar-label">Potongan Gaji</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jadwal -->
+      <div>
+        <button onclick="toggleSubmenu('jadwal')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="calendar" class="sidebar-icon"></i>
+            <span class="sidebar-label">Jadwal</span>
+          </div>
+          <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-jadwal"></i>
+        </button>
+        <div class="submenu-container" id="submenu-jadwal">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <a onclick="navigateTo('kalender-jadwal')" class="sidebar-link" data-page="kalender-jadwal">
+              <i data-lucide="calendar-days" class="sidebar-icon"></i><span class="sidebar-label">Kalender Jadwal</span>
+            </a>
+            <a onclick="navigateTo('atur-jadwal')" class="sidebar-link" data-page="atur-jadwal">
+              <i data-lucide="calendar-plus" class="sidebar-icon"></i><span class="sidebar-label">Atur Jadwal</span>
+            </a>
+            <a onclick="navigateTo('lokasi-kolam')" class="sidebar-link" data-page="lokasi-kolam">
+              <i data-lucide="map-pin" class="sidebar-icon"></i><span class="sidebar-label">Lokasi Kolam</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoice & Pembayaran -->
+      <div>
+        <button onclick="toggleSubmenu('invoice')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="receipt" class="sidebar-icon"></i>
+            <span class="sidebar-label">Invoice & Bayar</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="bg-warning text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">5</span>
+            <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-invoice"></i>
+          </div>
+        </button>
+        <div class="submenu-container" id="submenu-invoice">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <a onclick="navigateTo('pembayaran-pending')" class="sidebar-link" data-page="pembayaran-pending">
+              <i data-lucide="clock" class="sidebar-icon"></i><span class="sidebar-label">Pembayaran Pending</span>
+              <span class="bg-warning text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto">5</span>
+            </a>
+            <a onclick="navigateTo('histori-invoice')" class="sidebar-link" data-page="histori-invoice">
+              <i data-lucide="file-text" class="sidebar-icon"></i><span class="sidebar-label">Histori Invoice</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Siswa -->
+      <div>
+        <button onclick="toggleSubmenu('progress')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="trending-up" class="sidebar-icon"></i>
+            <span class="sidebar-label">Progress Siswa</span>
+          </div>
+          <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-progress"></i>
+        </button>
+        <div class="submenu-container" id="submenu-progress">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <a onclick="navigateTo('monitor-progress')" class="sidebar-link" data-page="monitor-progress">
+              <i data-lucide="activity" class="sidebar-icon"></i><span class="sidebar-label">Monitor Progress</span>
+            </a>
+            <a onclick="navigateTo('rapot')" class="sidebar-link" data-page="rapot">
+              <i data-lucide="book-open" class="sidebar-icon"></i><span class="sidebar-label">Rapot Bulanan & 6 Bln</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-border my-2"></div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-secondary/60 px-4 mb-1">Eksklusif Owner</p>
+
+      <!-- Keuangan -->
+      <div>
+        <button onclick="toggleSubmenu('keuangan')" class="sidebar-link w-full justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="wallet" class="sidebar-icon"></i>
+            <span class="sidebar-label">Keuangan</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">💎</span>
+            <i data-lucide="chevron-down" class="size-4 text-secondary transition-transform duration-200 submenu-arrow" id="arrow-keuangan"></i>
+          </div>
+        </button>
+        <div class="submenu-container" id="submenu-keuangan">
+          <div class="flex flex-col gap-0.5 pl-4 mt-1">
+            <!-- Pemasukan sub-group -->
+            <p class="text-[10px] font-bold uppercase tracking-wider text-secondary/50 px-4 pt-2 pb-1">Pemasukan</p>
+            <a onclick="navigateTo('rekap-pemasukan')" class="sidebar-link" data-page="rekap-pemasukan">
+              <i data-lucide="trending-up" class="sidebar-icon"></i><span class="sidebar-label">Rekap Pemasukan</span>
+            </a>
+            <a onclick="navigateTo('pemasukan-lainnya')" class="sidebar-link" data-page="pemasukan-lainnya">
+              <i data-lucide="plus-circle" class="sidebar-icon"></i><span class="sidebar-label">Pemasukan Lainnya</span>
+            </a>
+            <a onclick="navigateTo('piutang-pending')" class="sidebar-link" data-page="piutang-pending">
+              <i data-lucide="alert-circle" class="sidebar-icon"></i><span class="sidebar-label">Piutang Pending</span>
+            </a>
+            <!-- Pengeluaran sub-group -->
+            <p class="text-[10px] font-bold uppercase tracking-wider text-secondary/50 px-4 pt-2 pb-1">Pengeluaran</p>
+            <a onclick="navigateTo('gaji-pelatih')" class="sidebar-link" data-page="gaji-pelatih">
+              <i data-lucide="banknote" class="sidebar-icon"></i><span class="sidebar-label">Gaji Pelatih</span>
+            </a>
+            <a onclick="navigateTo('fixed-cost')" class="sidebar-link" data-page="fixed-cost">
+              <i data-lucide="building" class="sidebar-icon"></i><span class="sidebar-label">Fixed Cost</span>
+            </a>
+            <a onclick="navigateTo('variable-cost')" class="sidebar-link" data-page="variable-cost">
+              <i data-lucide="wrench" class="sidebar-icon"></i><span class="sidebar-label">Variable Cost</span>
+            </a>
+            <!-- Laporan sub-group -->
+            <p class="text-[10px] font-bold uppercase tracking-wider text-secondary/50 px-4 pt-2 pb-1">Laporan</p>
+            <a onclick="navigateTo('pnl-bulanan')" class="sidebar-link" data-page="pnl-bulanan">
+              <i data-lucide="bar-chart-3" class="sidebar-icon"></i><span class="sidebar-label">P&L Bulanan</span>
+            </a>
+            <a onclick="navigateTo('cashflow')" class="sidebar-link" data-page="cashflow">
+              <i data-lucide="line-chart" class="sidebar-icon"></i><span class="sidebar-label">Cashflow</span>
+            </a>
+            <a onclick="navigateTo('export')" class="sidebar-link" data-page="export">
+              <i data-lucide="download" class="sidebar-icon"></i><span class="sidebar-label">Export</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Bottom Profile -->
+    <div class="absolute bottom-0 left-0 w-[272px] bg-white border-t border-border">
+      <div class="flex items-center gap-3 p-4">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="Profile" class="size-10 rounded-full object-cover ring-2 ring-primary-soft">
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm text-foreground truncate">Owner Vaquita</p>
+          <p class="text-xs text-secondary truncate">Super Admin</p>
+        </div>
+        <button class="size-9 flex items-center justify-center rounded-xl hover:bg-muted transition-all cursor-pointer">
+          <i data-lucide="log-out" class="size-4 text-secondary"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 lg:ml-[272px] flex flex-col bg-background min-h-screen overflow-x-hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between w-full h-[72px] shrink-0 border-b border-border bg-white px-5 md:px-8">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="lg:hidden size-10 flex items-center justify-center rounded-xl ring-1 ring-border hover:ring-primary transition-all cursor-pointer">
+          <i data-lucide="menu" class="size-5 text-foreground"></i>
+        </button>
+        <h2 id="header-title" class="font-bold text-xl text-foreground">Dashboard</h2>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button class="size-10 flex items-center justify-center rounded-xl ring-1 ring-border hover:ring-primary transition-all cursor-pointer relative">
+          <i data-lucide="bell" class="size-5 text-secondary"></i>
+          <span class="absolute -top-1 -right-1 h-4 px-1 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">8</span>
+        </button>
+        <div class="hidden md:flex items-center gap-3 pl-3 border-l border-border">
+          <div class="text-right">
+            <p class="font-semibold text-foreground text-sm">Owner Vaquita</p>
+            <p class="text-secondary text-xs">Super Admin</p>
+          </div>
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="Profile" class="size-10 rounded-full object-cover ring-2 ring-primary-soft">
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="flex-1 overflow-y-auto p-5 md:p-8">
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <div id="page-dashboard" class="content-section active">
+        <h1 class="page-title">Dashboard Overview</h1>
+        <p class="page-subtitle">Selamat datang kembali! Berikut ringkasan bisnis Vaquita hari ini.</p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <div class="flex items-center gap-2">
+              <div class="size-10 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="users" class="size-5 text-primary"></i></div>
+              <p class="font-medium text-secondary text-sm">Siswa Aktif</p>
+            </div>
+            <div class="flex items-end justify-between">
+              <p class="font-bold text-[28px] leading-8">127</p>
+              <span class="badge badge-success">+8 bln ini</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex items-center gap-2">
+              <div class="size-10 bg-blue-50 rounded-xl flex items-center justify-center"><i data-lucide="life-buoy" class="size-5 text-blue-500"></i></div>
+              <p class="font-medium text-secondary text-sm">Pelatih Aktif</p>
+            </div>
+            <div class="flex items-end justify-between">
+              <p class="font-bold text-[28px] leading-8">12</p>
+              <span class="badge badge-primary">Stabil</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex items-center gap-2">
+              <div class="size-10 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="wallet" class="size-5 text-success"></i></div>
+              <p class="font-medium text-secondary text-sm">Pendapatan Bulan Ini</p>
+            </div>
+            <div class="flex items-end justify-between">
+              <p class="font-bold text-[28px] leading-8">Rp42,5jt</p>
+              <span class="badge badge-success">+12%</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex items-center gap-2">
+              <div class="size-10 bg-warning-light rounded-xl flex items-center justify-center"><i data-lucide="calendar-check" class="size-5 text-warning"></i></div>
+              <p class="font-medium text-secondary text-sm">Sesi Hari Ini</p>
+            </div>
+            <div class="flex items-end justify-between">
+              <p class="font-bold text-[28px] leading-8">18</p>
+              <span class="badge badge-muted">6 selesai</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div class="lg:col-span-2 card">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="font-bold text-lg text-foreground">Cashflow Bulanan</h3>
+                <p class="text-secondary text-sm">Pemasukan vs Pengeluaran vs Laba Bersih</p>
+              </div>
+              <select class="select-field w-auto">
+                <option>6 Bulan Terakhir</option>
+                <option>12 Bulan Terakhir</option>
+              </select>
+            </div>
+            <div class="w-full h-[300px]"><canvas id="cashflowChart"></canvas></div>
+          </div>
+          <div class="card">
+            <h3 class="font-bold text-lg text-foreground mb-1">Gaji Pelatih</h3>
+            <p class="text-secondary text-sm mb-4">Rekap bulan April 2026</p>
+            <div class="flex flex-col gap-3.5">
+              <div class="flex items-center justify-between"><span class="text-sm text-foreground">Total Sesi</span><span class="font-bold text-sm">216 sesi</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-foreground">Gaji Kotor</span><span class="font-bold text-sm text-foreground">Rp18.720.000</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-error">Total Potongan</span><span class="font-bold text-sm text-error">-Rp1.250.000</span></div>
+              <div class="border-t border-border pt-3 flex items-center justify-between"><span class="text-sm font-semibold text-foreground">Gaji Bersih</span><span class="font-bold text-lg text-primary">Rp17.470.000</span></div>
+            </div>
+            <button class="btn-outline w-full mt-4 flex items-center justify-center gap-2"><i data-lucide="file-text" class="size-4"></i>Lihat Detail</button>
+          </div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Siswa Stagnan -->
+          <div class="lg:col-span-2 card">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h3 class="font-bold text-lg text-foreground">Siswa Stagnan Bulan Ini</h3>
+                <p class="text-secondary text-sm">Tidak ada peningkatan level vs bulan lalu</p>
+              </div>
+              <span class="badge badge-error">4 siswa</span>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Siswa</th><th>Pelatih</th><th>Level Saat Ini</th><th>Sejak</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="font-medium">Andi Pratama</td><td>Coach Rina</td><td>Level 3</td><td>2 bulan</td><td><span class="badge badge-warning">Stagnan</span></td></tr>
+                  <tr><td class="font-medium">Sari Dewi</td><td>Coach Budi</td><td>Level 2</td><td>3 bulan</td><td><span class="badge badge-error">Kritis</span></td></tr>
+                  <tr><td class="font-medium">Riko Saputra</td><td>Coach Rina</td><td>Level 4</td><td>2 bulan</td><td><span class="badge badge-warning">Stagnan</span></td></tr>
+                  <tr><td class="font-medium">Maya Putri</td><td>Coach Dian</td><td>Level 1</td><td>4 bulan</td><td><span class="badge badge-error">Kritis</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card flex flex-col gap-3">
+            <h3 class="font-bold text-lg text-foreground mb-1">Aksi Cepat</h3>
+            <button onclick="navigateTo('pendaftar-baru')" class="flex items-center gap-3 p-3.5 rounded-xl bg-primary-light hover:bg-primary-soft/40 transition-all cursor-pointer text-left">
+              <div class="size-10 bg-primary rounded-xl flex items-center justify-center shrink-0"><i data-lucide="user-plus" class="size-5 text-white"></i></div>
+              <div><p class="font-semibold text-sm text-foreground">Pendaftar Baru</p><p class="text-xs text-secondary">3 menunggu verifikasi</p></div>
+            </button>
+            <button onclick="navigateTo('pembayaran-pending')" class="flex items-center gap-3 p-3.5 rounded-xl bg-warning-light hover:bg-warning/10 transition-all cursor-pointer text-left">
+              <div class="size-10 bg-warning rounded-xl flex items-center justify-center shrink-0"><i data-lucide="credit-card" class="size-5 text-white"></i></div>
+              <div><p class="font-semibold text-sm text-foreground">Pembayaran Pending</p><p class="text-xs text-secondary">5 perlu verifikasi</p></div>
+            </button>
+            <button onclick="navigateTo('atur-jadwal')" class="flex items-center gap-3 p-3.5 rounded-xl bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer text-left">
+              <div class="size-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="calendar-plus" class="size-5 text-white"></i></div>
+              <div><p class="font-semibold text-sm text-foreground">Atur Jadwal</p><p class="text-xs text-secondary">Buat slot jadwal baru</p></div>
+            </button>
+            <button onclick="navigateTo('pnl-bulanan')" class="flex items-center gap-3 p-3.5 rounded-xl bg-primary-light hover:bg-primary-soft/40 transition-all cursor-pointer text-left">
+              <div class="size-10 bg-primary rounded-xl flex items-center justify-center shrink-0"><i data-lucide="bar-chart-3" class="size-5 text-white"></i></div>
+              <div><p class="font-semibold text-sm text-foreground">Laporan P&L</p><p class="text-xs text-secondary">Laba bersih bulan ini</p></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLACEHOLDER SECTIONS (will be filled in Phase 2 & 3) -->
+      <!-- ==================== DAFTAR SISWA ==================== -->
+      <div id="page-daftar-siswa" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Daftar Siswa</h1><p class="text-secondary text-sm">Database seluruh siswa terdaftar di Vaquita</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="user-plus" class="size-4"></i>Tambah Siswa</button>
+        </div>
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-3 mb-5">
+          <input type="text" placeholder="Cari nama siswa..." class="input-field max-w-xs">
+          <select class="select-field w-auto"><option>Semua Pelatih</option><option>Coach Rina</option><option>Coach Budi</option><option>Coach Dian</option><option>Coach Arif</option></select>
+          <select class="select-field w-auto"><option>Semua Status</option><option>Aktif</option><option>Nonaktif</option><option>Suspended</option></select>
+          <select class="select-field w-auto"><option>Semua Level</option><option>Level 1</option><option>Level 2</option><option>Level 3</option><option>Level 4</option><option>Level 5</option></select>
+        </div>
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Nama Siswa</th><th>Paket</th><th>Pelatih</th><th>Level</th><th>Sisa Kuota</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Andi Pratama</td><td>Premium 8x</td><td>Coach Rina</td><td>Level 3</td><td>5 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Sari Dewi</td><td>Reguler 4x</td><td>Coach Budi</td><td>Level 2</td><td>2 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Riko Saputra</td><td>Premium 8x</td><td>Coach Rina</td><td>Level 4</td><td>7 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Maya Putri</td><td>Keluarga 4 org</td><td>Coach Dian</td><td>Level 1</td><td>0 sesi</td><td><span class="badge badge-warning">Habis Kuota</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Bima Arya</td><td>Reguler 4x</td><td>Coach Arif</td><td>Level 3</td><td>1 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Lina Sari</td><td>Premium 8x</td><td>Coach Budi</td><td>Level 5</td><td>6 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Dimas Putra</td><td>Reguler 4x</td><td>Coach Dian</td><td>Level 2</td><td>0 sesi</td><td><span class="badge badge-error">Nonaktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+              <tr><td class="font-medium">Putri Ayu</td><td>Premium 8x</td><td>Coach Arif</td><td>Level 3</td><td>4 sesi</td><td><span class="badge badge-success">Aktif</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Detail</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex items-center justify-between mt-4 text-sm text-secondary"><span>Menampilkan 8 dari 127 siswa</span><div class="flex gap-1"><button class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium">1</button><button class="px-3 py-1.5 rounded-lg hover:bg-muted text-sm cursor-pointer">2</button><button class="px-3 py-1.5 rounded-lg hover:bg-muted text-sm cursor-pointer">3</button><button class="px-3 py-1.5 rounded-lg hover:bg-muted text-sm cursor-pointer">→</button></div></div>
+      </div>
+
+      <!-- ==================== PENDAFTAR BARU ==================== -->
+      <div id="page-pendaftar-baru" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Pendaftar Baru</h1><p class="text-secondary text-sm">Calon siswa yang menunggu verifikasi pendaftaran</p></div>
+          <span class="badge badge-error text-sm px-3 py-1.5">3 menunggu verifikasi</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <!-- Card 1 -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-primary-light rounded-full flex items-center justify-center"><i data-lucide="user" class="size-6 text-primary"></i></div>
+              <div><p class="font-semibold text-foreground">Ahmad Fauzi</p><p class="text-xs text-secondary">Daftar: 6 Apr 2026</p></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Usia</span><span class="font-medium">8 tahun</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Paket Dipilih</span><span class="font-medium text-primary">Premium 8x</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Request</span><span class="font-medium">Coach Rina</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kolam</span><span class="font-medium">Kolam Utama</span></div>
+              <div class="flex justify-between"><span class="text-secondary">No. Orang Tua</span><span class="font-medium">0812-xxxx-1234</span></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-1.5"><i data-lucide="check" class="size-4"></i>Terima</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-1.5 text-error border-error/30 hover:bg-error-light hover:text-error hover:border-error"><i data-lucide="x" class="size-4"></i>Tolak</button>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-primary-light rounded-full flex items-center justify-center"><i data-lucide="user" class="size-6 text-primary"></i></div>
+              <div><p class="font-semibold text-foreground">Nadia Putri</p><p class="text-xs text-secondary">Daftar: 5 Apr 2026</p></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Usia</span><span class="font-medium">10 tahun</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Paket Dipilih</span><span class="font-medium text-primary">Reguler 4x</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Request</span><span class="font-medium">Coach Budi</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kolam</span><span class="font-medium">Kolam Timur</span></div>
+              <div class="flex justify-between"><span class="text-secondary">No. Orang Tua</span><span class="font-medium">0813-xxxx-5678</span></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-1.5"><i data-lucide="check" class="size-4"></i>Terima</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-1.5 text-error border-error/30 hover:bg-error-light hover:text-error hover:border-error"><i data-lucide="x" class="size-4"></i>Tolak</button>
+            </div>
+          </div>
+          <!-- Card 3 Keluarga -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all ring-1 ring-primary/20">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-primary-light rounded-full flex items-center justify-center"><i data-lucide="users" class="size-6 text-primary"></i></div>
+              <div><p class="font-semibold text-foreground">Keluarga Santoso</p><p class="text-xs text-secondary">Daftar: 4 Apr 2026 · <span class="text-primary font-medium">Paket Keluarga</span></p></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Jumlah Anggota</span><span class="font-medium">2 anak</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Paket Dipilih</span><span class="font-medium text-primary">Keluarga 2 org</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Request</span><span class="font-medium">Coach Dian</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kolam</span><span class="font-medium">Kolam Utama</span></div>
+              <div class="flex justify-between"><span class="text-secondary">No. Orang Tua</span><span class="font-medium">0815-xxxx-9012</span></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-1.5"><i data-lucide="check" class="size-4"></i>Terima</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-1.5 text-error border-error/30 hover:bg-error-light hover:text-error hover:border-error"><i data-lucide="x" class="size-4"></i>Tolak</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PAKET LANGGANAN ==================== -->
+      <div id="page-paket-langganan" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Paket Langganan</h1><p class="text-secondary text-sm">Kelola jenis paket & diskon untuk siswa</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Paket</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all relative">
+            <span class="absolute top-4 right-4 badge badge-success">Populer</span>
+            <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center mb-3"><i data-lucide="zap" class="size-6 text-primary"></i></div>
+            <h3 class="font-bold text-lg text-foreground">Reguler 4x</h3>
+            <p class="text-secondary text-sm mb-3">4 sesi per bulan</p>
+            <p class="text-2xl font-bold text-primary mb-1">Rp400.000</p>
+            <p class="text-xs text-secondary mb-4">/bulan</p>
+            <div class="flex flex-col gap-1.5 text-sm text-secondary mb-4">
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>4 sesi / bulan</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>1 pelatih</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Rapot bulanan</div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs text-error border-error/30">Nonaktif</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all ring-2 ring-primary relative">
+            <span class="absolute top-4 right-4 badge badge-primary">Best Seller</span>
+            <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center mb-3"><i data-lucide="crown" class="size-6 text-primary"></i></div>
+            <h3 class="font-bold text-lg text-foreground">Premium 8x</h3>
+            <p class="text-secondary text-sm mb-3">8 sesi per bulan</p>
+            <p class="text-2xl font-bold text-primary mb-1">Rp750.000</p>
+            <p class="text-xs text-secondary mb-4">/bulan · <span class="text-success font-medium">Hemat 6%</span></p>
+            <div class="flex flex-col gap-1.5 text-sm text-secondary mb-4">
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>8 sesi / bulan</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Pilih pelatih</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Rapot bulanan + 6 bln</div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs text-error border-error/30">Nonaktif</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all relative">
+            <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center mb-3"><i data-lucide="users" class="size-6 text-primary"></i></div>
+            <h3 class="font-bold text-lg text-foreground">Keluarga 2 org</h3>
+            <p class="text-secondary text-sm mb-3">2 anak, 4 sesi/anak</p>
+            <p class="text-2xl font-bold text-primary mb-1">Rp700.000</p>
+            <p class="text-xs text-secondary mb-4">/bulan · <span class="text-success font-medium">Hemat 12%</span></p>
+            <div class="flex flex-col gap-1.5 text-sm text-secondary mb-4">
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>8 sesi total</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Akun terpisah per anak</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Rapot per anak</div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs text-error border-error/30">Nonaktif</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all relative">
+            <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center mb-3"><i data-lucide="heart" class="size-6 text-primary"></i></div>
+            <h3 class="font-bold text-lg text-foreground">Keluarga 4 org</h3>
+            <p class="text-secondary text-sm mb-3">4 anak, 4 sesi/anak</p>
+            <p class="text-2xl font-bold text-primary mb-1">Rp1.200.000</p>
+            <p class="text-xs text-secondary mb-4">/bulan · <span class="text-success font-medium">Hemat 25%</span></p>
+            <div class="flex flex-col gap-1.5 text-sm text-secondary mb-4">
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>16 sesi total</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Akun terpisah per anak</div>
+              <div class="flex items-center gap-2"><i data-lucide="check-circle" class="size-4 text-success"></i>Rapot per anak</div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs text-error border-error/30">Nonaktif</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== DAFTAR PELATIH ==================== -->
+      <div id="page-daftar-pelatih" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Daftar Pelatih</h1><p class="text-secondary text-sm">Kelola data pelatih renang Vaquita</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Pelatih</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-4 mb-4">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" alt="Rina" class="size-14 rounded-full object-cover ring-2 ring-primary-soft">
+              <div><p class="font-bold text-foreground">Coach Rina</p><p class="text-sm text-secondary">Spesialis: Anak-anak</p><span class="badge badge-success mt-1">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm border-t border-border pt-3">
+              <div class="flex justify-between"><span class="text-secondary">Siswa Aktif</span><span class="font-medium">32</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Bulan Ini</span><span class="font-medium">48</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kontak</span><span class="font-medium">0812-xxxx-1111</span></div>
+            </div>
+            <div class="flex gap-2 mt-4"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Gaji</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-4 mb-4">
+              <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop" alt="Budi" class="size-14 rounded-full object-cover ring-2 ring-primary-soft">
+              <div><p class="font-bold text-foreground">Coach Budi</p><p class="text-sm text-secondary">Spesialis: Dewasa & Remaja</p><span class="badge badge-success mt-1">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm border-t border-border pt-3">
+              <div class="flex justify-between"><span class="text-secondary">Siswa Aktif</span><span class="font-medium">28</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Bulan Ini</span><span class="font-medium">42</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kontak</span><span class="font-medium">0813-xxxx-2222</span></div>
+            </div>
+            <div class="flex gap-2 mt-4"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Gaji</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-4 mb-4">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="Dian" class="size-14 rounded-full object-cover ring-2 ring-primary-soft">
+              <div><p class="font-bold text-foreground">Coach Dian</p><p class="text-sm text-secondary">Spesialis: Bayi & Balita</p><span class="badge badge-success mt-1">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm border-t border-border pt-3">
+              <div class="flex justify-between"><span class="text-secondary">Siswa Aktif</span><span class="font-medium">22</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Bulan Ini</span><span class="font-medium">35</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kontak</span><span class="font-medium">0815-xxxx-3333</span></div>
+            </div>
+            <div class="flex gap-2 mt-4"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Gaji</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-4 mb-4">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" alt="Arif" class="size-14 rounded-full object-cover ring-2 ring-primary-soft">
+              <div><p class="font-bold text-foreground">Coach Arif</p><p class="text-sm text-secondary">Spesialis: Kompetisi</p><span class="badge badge-success mt-1">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm border-t border-border pt-3">
+              <div class="flex justify-between"><span class="text-secondary">Siswa Aktif</span><span class="font-medium">25</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Bulan Ini</span><span class="font-medium">40</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Kontak</span><span class="font-medium">0816-xxxx-4444</span></div>
+            </div>
+            <div class="flex gap-2 mt-4"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Gaji</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== REKAP KEHADIRAN ==================== -->
+      <div id="page-rekap-kehadiran" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Rekap Kehadiran Pelatih</h1><p class="text-secondary text-sm">Monitoring kehadiran dan keterlambatan pelatih per bulan</p></div>
+          <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option><option>Februari 2026</option></select>
+        </div>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="check-circle" class="size-5 text-success"></i></div><p class="text-sm text-secondary">Total Hadir</p></div><p class="font-bold text-2xl">186 <span class="text-sm font-medium text-secondary">sesi</span></p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-warning-light rounded-xl flex items-center justify-center"><i data-lucide="clock" class="size-5 text-warning"></i></div><p class="text-sm text-secondary">Terlambat (>10 min)</p></div><p class="font-bold text-2xl text-warning">22 <span class="text-sm font-medium text-secondary">sesi</span></p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-error-light rounded-xl flex items-center justify-center"><i data-lucide="x-circle" class="size-5 text-error"></i></div><p class="text-sm text-secondary">Tidak Hadir</p></div><p class="font-bold text-2xl text-error">8 <span class="text-sm font-medium text-secondary">sesi</span></p></div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Pelatih</th><th>Total Sesi</th><th>Hadir</th><th>Terlambat</th><th>Tidak Hadir</th><th>% Kehadiran</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Coach Rina</td><td>52</td><td class="text-success font-medium">48</td><td class="text-warning font-medium">3</td><td class="text-error font-medium">1</td><td><div class="flex items-center gap-2"><div class="w-20 h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-success rounded-full" style="width:92%"></div></div><span class="text-sm font-medium">92%</span></div></td></tr>
+              <tr><td class="font-medium">Coach Budi</td><td>48</td><td class="text-success font-medium">40</td><td class="text-warning font-medium">6</td><td class="text-error font-medium">2</td><td><div class="flex items-center gap-2"><div class="w-20 h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-warning rounded-full" style="width:83%"></div></div><span class="text-sm font-medium">83%</span></div></td></tr>
+              <tr><td class="font-medium">Coach Dian</td><td>40</td><td class="text-success font-medium">36</td><td class="text-warning font-medium">3</td><td class="text-error font-medium">1</td><td><div class="flex items-center gap-2"><div class="w-20 h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-success rounded-full" style="width:90%"></div></div><span class="text-sm font-medium">90%</span></div></td></tr>
+              <tr><td class="font-medium">Coach Arif</td><td>44</td><td class="text-success font-medium">38</td><td class="text-warning font-medium">4</td><td class="text-error font-medium">2</td><td><div class="flex items-center gap-2"><div class="w-20 h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-warning rounded-full" style="width:86%"></div></div><span class="text-sm font-medium">86%</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== POTONGAN GAJI ==================== -->
+      <div id="page-potongan-gaji" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Potongan Gaji</h1><p class="text-secondary text-sm">Input potongan manual & lihat riwayat potongan pelatih</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Potongan</button>
+        </div>
+        <!-- Input Form -->
+        <div class="card mb-6">
+          <h3 class="font-bold text-foreground mb-4">Input Potongan Manual</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div><label class="label-field">Pelatih</label><select class="select-field"><option>Pilih Pelatih</option><option>Coach Rina</option><option>Coach Budi</option><option>Coach Dian</option><option>Coach Arif</option></select></div>
+            <div><label class="label-field">Kategori</label><select class="select-field"><option>Pilih Kategori</option><option>Tidak Hadir</option><option>Keterlambatan</option><option>Pelanggaran</option><option>Lainnya</option></select></div>
+            <div><label class="label-field">Nominal (Rp)</label><input type="text" class="input-field" placeholder="50000"></div>
+            <div><label class="label-field">Keterangan</label><input type="text" class="input-field" placeholder="Alasan potongan..."></div>
+          </div>
+          <button class="btn-primary mt-4 flex items-center gap-2"><i data-lucide="save" class="size-4"></i>Simpan Potongan</button>
+        </div>
+        <!-- History -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Tanggal</th><th>Pelatih</th><th>Kategori</th><th>Nominal</th><th>Keterangan</th><th>Tipe</th></tr></thead>
+            <tbody>
+              <tr><td>7 Apr 2026</td><td class="font-medium">Coach Budi</td><td>Keterlambatan</td><td class="text-error font-medium">-Rp50.000</td><td>Terlambat 15 menit sesi pagi</td><td><span class="badge badge-muted">Otomatis</span></td></tr>
+              <tr><td>6 Apr 2026</td><td class="font-medium">Coach Arif</td><td>Tidak Hadir</td><td class="text-error font-medium">-Rp100.000</td><td>Tidak hadir tanpa konfirmasi</td><td><span class="badge badge-primary">Manual</span></td></tr>
+              <tr><td>5 Apr 2026</td><td class="font-medium">Coach Rina</td><td>Keterlambatan</td><td class="text-error font-medium">-Rp50.000</td><td>Terlambat 12 menit sesi sore</td><td><span class="badge badge-muted">Otomatis</span></td></tr>
+              <tr><td>3 Apr 2026</td><td class="font-medium">Coach Budi</td><td>Pelanggaran</td><td class="text-error font-medium">-Rp150.000</td><td>Meninggalkan sesi sebelum selesai</td><td><span class="badge badge-primary">Manual</span></td></tr>
+              <tr><td>1 Apr 2026</td><td class="font-medium">Coach Dian</td><td>Keterlambatan</td><td class="text-error font-medium">-Rp50.000</td><td>Terlambat 20 menit</td><td><span class="badge badge-muted">Otomatis</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== KALENDER JADWAL ==================== -->
+      <div id="page-kalender-jadwal" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Kalender Jadwal</h1><p class="text-secondary text-sm">Kelola sesi latihan — klik sesi untuk detail, klik tanggal untuk buat sesi baru</p></div>
+          <div class="flex items-center gap-2">
+            <select class="select-field w-auto" id="cal-filter-coach">
+              <option value="all">Semua Pelatih</option>
+              <option value="rina">Coach Rina</option>
+              <option value="budi">Coach Budi</option>
+              <option value="dian">Coach Dian</option>
+              <option value="arif">Coach Arif</option>
+            </select>
+          </div>
+        </div>
+        <!-- Month Nav -->
+        <div class="flex items-center justify-between mb-4 card !py-3 !px-5">
+          <button onclick="calChangeMonth(-1)" class="size-9 rounded-xl bg-muted flex items-center justify-center hover:bg-primary-light transition cursor-pointer"><i data-lucide="chevron-left" class="size-5 text-foreground"></i></button>
+          <h2 class="font-bold text-lg text-foreground" id="cal-month-title">April 2026</h2>
+          <button onclick="calChangeMonth(1)" class="size-9 rounded-xl bg-muted flex items-center justify-center hover:bg-primary-light transition cursor-pointer"><i data-lucide="chevron-right" class="size-5 text-foreground"></i></button>
+        </div>
+        <!-- Legend -->
+        <div class="flex flex-wrap gap-3 mb-4 text-xs">
+          <span class="flex items-center gap-1.5"><span class="size-3 rounded-sm bg-[#4AAF94]"></span>Coach Rina</span>
+          <span class="flex items-center gap-1.5"><span class="size-3 rounded-sm bg-[#F5A623]"></span>Coach Budi</span>
+          <span class="flex items-center gap-1.5"><span class="size-3 rounded-sm bg-[#42A5F5]"></span>Coach Dian</span>
+          <span class="flex items-center gap-1.5"><span class="size-3 rounded-sm bg-[#AB47BC]"></span>Coach Arif</span>
+        </div>
+        <!-- Calendar Grid -->
+        <div class="cal-scroll">
+          <div id="cal-grid" class="cal-grid"></div>
+        </div>
+      </div>
+
+      <!-- ==================== SESSION DETAIL MODAL ==================== -->
+      <div id="session-modal" class="modal-overlay" onclick="if(event.target===this)closeSessionModal()">
+        <div class="modal-box">
+          <div class="p-6 border-b border-border">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg text-foreground" id="modal-session-title">Detail Sesi</h3>
+              <button onclick="closeSessionModal()" class="size-8 rounded-lg hover:bg-muted flex items-center justify-center cursor-pointer"><i data-lucide="x" class="size-5 text-secondary"></i></button>
+            </div>
+          </div>
+          <div class="p-6" id="modal-session-body">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CREATE SESSION MODAL ==================== -->
+      <div id="create-session-modal" class="modal-overlay" onclick="if(event.target===this)closeCreateModal()">
+        <div class="modal-box">
+          <div class="p-6 border-b border-border">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg text-foreground">Buat Sesi Baru</h3>
+              <button onclick="closeCreateModal()" class="size-8 rounded-lg hover:bg-muted flex items-center justify-center cursor-pointer"><i data-lucide="x" class="size-5 text-secondary"></i></button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center gap-2 bg-primary-light rounded-xl p-3">
+                <i data-lucide="calendar" class="size-5 text-primary"></i>
+                <span class="text-sm font-medium text-foreground" id="create-date-label">Senin, 7 April 2026</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="label-field">Pelatih</label><select class="select-field" id="create-coach"><option value="rina">Coach Rina</option><option value="budi">Coach Budi</option><option value="dian">Coach Dian</option><option value="arif">Coach Arif</option></select></div>
+                <div><label class="label-field">Jam</label><input type="time" class="input-field" id="create-time" value="07:00"></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="label-field">Kolam</label><select class="select-field" id="create-pool"><option>Kolam Utama</option><option>Kolam Timur</option><option>Kolam Selatan</option></select></div>
+                <div><label class="label-field">Maks Siswa</label><input type="number" class="input-field" id="create-max" value="5" min="1" max="10"></div>
+              </div>
+              <div><label class="label-field">Siswa (pilih beberapa)</label>
+                <div class="flex flex-wrap gap-2 p-3 bg-muted rounded-xl max-h-32 overflow-y-auto" id="create-students-pool">
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox" class="accent-[#4AAF94]"> Andi Pratama</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Sari Dewi</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Riko Saputra</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Bima Arya</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Maya Putri</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Lina Sari</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Putri Ayu</label>
+                  <label class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary transition"><input type="checkbox"> Dimas Putra</label>
+                </div>
+              </div>
+              <button class="btn-primary flex items-center justify-center gap-2 w-full" onclick="handleCreateSession()"><i data-lucide="plus" class="size-4"></i>Buat Sesi</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== ATUR JADWAL ==================== -->
+      <div id="page-atur-jadwal" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Atur Jadwal Tetap</h1><p class="text-secondary text-sm">Kelola slot jadwal rutin mingguan untuk setiap pelatih — sesi dibuat otomatis setiap minggu</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0" onclick="document.getElementById('add-fixed-slot').classList.toggle('hidden')"><i data-lucide="plus" class="size-4"></i>Tambah Slot Tetap</button>
+        </div>
+        <!-- Add Fixed Slot Form -->
+        <div id="add-fixed-slot" class="card mb-6 hidden">
+          <h3 class="font-bold text-foreground mb-4">Buat Slot Jadwal Tetap (Berulang Mingguan)</h3>
+          <div class="text-xs text-secondary bg-primary-light rounded-xl p-3 mb-4 flex items-start gap-2"><i data-lucide="info" class="size-4 text-primary shrink-0 mt-0.5"></i><span>Slot tetap akan otomatis membuat sesi setiap minggu pada hari & jam yang ditentukan. Anda bisa mengelola siswa per sesi dari Kalender Jadwal.</span></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            <div><label class="label-field">Pelatih</label><select class="select-field"><option>Pilih Pelatih</option><option>Coach Rina</option><option>Coach Budi</option><option>Coach Dian</option><option>Coach Arif</option></select></div>
+            <div><label class="label-field">Hari (pilih 1+)</label>
+              <div class="flex flex-wrap gap-1.5">
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox" class="accent-[#4AAF94]"> Sen</label>
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox"> Sel</label>
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox"> Rab</label>
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox"> Kam</label>
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox"> Jum</label>
+                <label class="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary-light transition"><input type="checkbox"> Sab</label>
+              </div>
+            </div>
+            <div><label class="label-field">Jam</label><input type="time" class="input-field" value="07:00"></div>
+            <div><label class="label-field">Kolam</label><select class="select-field"><option>Kolam Utama</option><option>Kolam Timur</option><option>Kolam Selatan</option></select></div>
+            <div><label class="label-field">Maks Siswa</label><input type="number" class="input-field" value="5" min="1" max="10"></div>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button class="btn-primary flex items-center gap-2"><i data-lucide="save" class="size-4"></i>Simpan Slot Tetap</button>
+            <button class="btn-outline" onclick="document.getElementById('add-fixed-slot').classList.add('hidden')">Batal</button>
+          </div>
+        </div>
+
+        <!-- Fixed Slots per Coach -->
+        <div class="flex flex-col gap-5">
+          <!-- Coach Rina -->
+          <div class="card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-10 rounded-xl flex items-center justify-center" style="background:#E0F5EE"><span class="text-lg">🏊</span></div>
+              <div><p class="font-bold text-foreground">Coach Rina</p><p class="text-xs text-secondary">3 slot tetap aktif · 9 sesi/minggu</p></div>
+              <span class="badge badge-success ml-auto">Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#E0F5EE] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#4AAF94]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sen, Rab, Jum · 07:00</p><p class="text-xs text-secondary">Kolam Utama · Maks 5 siswa</p><p class="text-xs text-primary font-medium mt-1">3 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer" title="Edit"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer" title="Hapus"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#E0F5EE] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#4AAF94]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sab · 09:00</p><p class="text-xs text-secondary">Kolam Utama · Maks 5 siswa</p><p class="text-xs text-primary font-medium mt-1">4 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#E0F5EE] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#4AAF94]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sel, Kam · 16:00</p><p class="text-xs text-secondary">Kolam Utama · Maks 3 siswa</p><p class="text-xs text-warning font-medium mt-1">3/3 penuh</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Coach Budi -->
+          <div class="card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-10 rounded-xl flex items-center justify-center" style="background:#FFF3E0"><span class="text-lg">🏊</span></div>
+              <div><p class="font-bold text-foreground">Coach Budi</p><p class="text-xs text-secondary">2 slot tetap aktif · 6 sesi/minggu</p></div>
+              <span class="badge badge-success ml-auto">Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#FFF3E0] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#F5A623]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sen, Rab · 09:00</p><p class="text-xs text-secondary">Kolam Timur · Maks 5 siswa</p><p class="text-xs text-primary font-medium mt-1">4 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#FFF3E0] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#F5A623]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sel, Kam, Jum · 16:00</p><p class="text-xs text-secondary">Kolam Timur · Maks 5 siswa</p><p class="text-xs text-primary font-medium mt-1">2 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Coach Dian -->
+          <div class="card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-10 rounded-xl flex items-center justify-center" style="background:#E8F4FD"><span class="text-lg">🏊</span></div>
+              <div><p class="font-bold text-foreground">Coach Dian</p><p class="text-xs text-secondary">1 slot tetap aktif · 2 sesi/minggu</p></div>
+              <span class="badge badge-success ml-auto">Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#E8F4FD] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#42A5F5]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sel, Kam · 09:00</p><p class="text-xs text-secondary">Kolam Utama · Maks 3 siswa</p><p class="text-xs text-primary font-medium mt-1">2 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Coach Arif -->
+          <div class="card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-10 rounded-xl flex items-center justify-center" style="background:#F3E5F5"><span class="text-lg">🏊</span></div>
+              <div><p class="font-bold text-foreground">Coach Arif</p><p class="text-xs text-secondary">2 slot tetap aktif · 6 sesi/minggu</p></div>
+              <span class="badge badge-success ml-auto">Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#F3E5F5] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#AB47BC]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sel, Kam, Sab · 14:00</p><p class="text-xs text-secondary">Kolam Timur · Maks 5 siswa</p><p class="text-xs text-error font-medium mt-1">5/5 penuh!</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:border-primary-soft transition">
+                <div class="size-9 rounded-lg bg-[#F3E5F5] flex items-center justify-center shrink-0"><i data-lucide="repeat" class="size-4 text-[#AB47BC]"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Sab · 16:00</p><p class="text-xs text-secondary">Kolam Utama · Maks 5 siswa</p><p class="text-xs text-primary font-medium mt-1">3 siswa terdaftar</p></div>
+                <div class="flex gap-1 shrink-0"><button class="size-7 rounded-lg hover:bg-white flex items-center justify-center cursor-pointer"><i data-lucide="pencil" class="size-3.5 text-secondary"></i></button><button class="size-7 rounded-lg hover:bg-error-light flex items-center justify-center cursor-pointer"><i data-lucide="trash-2" class="size-3.5 text-error"></i></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ==================== LOKASI KOLAM ==================== -->
+      <div id="page-lokasi-kolam" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Lokasi Kolam</h1><p class="text-secondary text-sm">Kelola kolam renang & radius GPS untuk absensi pelatih</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Kolam</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="map-pin" class="size-6 text-primary"></i></div>
+              <div><p class="font-bold text-foreground">Kolam Utama</p><span class="badge badge-success">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Alamat</span><span class="font-medium text-right max-w-[200px]">Jl. Merdeka No. 15, Jakarta Selatan</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Radius GPS</span><span class="font-medium">100 meter</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Assign</span><span class="font-medium">Rina, Dian</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Aktif</span><span class="font-medium">8 slot/minggu</span></div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Map</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-blue-50 rounded-xl flex items-center justify-center"><i data-lucide="map-pin" class="size-6 text-blue-500"></i></div>
+              <div><p class="font-bold text-foreground">Kolam Timur</p><span class="badge badge-success">Aktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Alamat</span><span class="font-medium text-right max-w-[200px]">Jl. Raya Timur No. 42, Jakarta Timur</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Radius GPS</span><span class="font-medium">150 meter</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Assign</span><span class="font-medium">Budi, Arif</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Aktif</span><span class="font-medium">6 slot/minggu</span></div>
+            </div>
+            <div class="flex gap-2"><button class="btn-outline flex-1 text-xs">Edit</button><button class="btn-outline flex-1 text-xs">Lihat Map</button></div>
+          </div>
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all opacity-60">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-muted rounded-xl flex items-center justify-center"><i data-lucide="map-pin" class="size-6 text-secondary"></i></div>
+              <div><p class="font-bold text-foreground">Kolam Selatan</p><span class="badge badge-muted">Nonaktif</span></div>
+            </div>
+            <div class="flex flex-col gap-2 text-sm mb-4">
+              <div class="flex justify-between"><span class="text-secondary">Alamat</span><span class="font-medium text-right max-w-[200px]">Jl. Selatan Indah No. 8, Depok</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Radius GPS</span><span class="font-medium">120 meter</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Pelatih Assign</span><span class="font-medium">—</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Sesi Aktif</span><span class="font-medium">0 slot/minggu</span></div>
+            </div>
+            <div class="flex gap-2"><button class="btn-primary flex-1 text-xs">Aktifkan</button><button class="btn-outline flex-1 text-xs">Edit</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PEMBAYARAN PENDING ==================== -->
+      <div id="page-pembayaran-pending" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Pembayaran Pending</h1><p class="text-secondary text-sm">Verifikasi bukti pembayaran dari siswa/orang tua</p></div>
+          <span class="badge badge-warning text-sm px-3 py-1.5">5 menunggu verifikasi</span>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Invoice</th><th>Siswa</th><th>Paket</th><th>Nominal</th><th>Tgl Upload</th><th>Bukti</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium text-primary">INV-2026-0041</td><td>Andi Pratama</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>7 Apr 2026</td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Bukti</button></td><td><div class="flex gap-2"><button class="btn-primary text-xs py-1.5 px-3">ACC</button><button class="btn-outline text-xs py-1.5 px-3 text-error border-error/30">Tolak</button></div></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0040</td><td>Sari Dewi</td><td>Reguler 4x</td><td class="font-medium">Rp400.000</td><td>6 Apr 2026</td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Bukti</button></td><td><div class="flex gap-2"><button class="btn-primary text-xs py-1.5 px-3">ACC</button><button class="btn-outline text-xs py-1.5 px-3 text-error border-error/30">Tolak</button></div></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0039</td><td>Kel. Santoso</td><td>Keluarga 2 org</td><td class="font-medium">Rp700.000</td><td>5 Apr 2026</td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Bukti</button></td><td><div class="flex gap-2"><button class="btn-primary text-xs py-1.5 px-3">ACC</button><button class="btn-outline text-xs py-1.5 px-3 text-error border-error/30">Tolak</button></div></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0038</td><td>Bima Arya</td><td>Reguler 4x</td><td class="font-medium">Rp400.000</td><td>4 Apr 2026</td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Bukti</button></td><td><div class="flex gap-2"><button class="btn-primary text-xs py-1.5 px-3">ACC</button><button class="btn-outline text-xs py-1.5 px-3 text-error border-error/30">Tolak</button></div></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0037</td><td>Lina Sari</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>3 Apr 2026</td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Bukti</button></td><td><div class="flex gap-2"><button class="btn-primary text-xs py-1.5 px-3">ACC</button><button class="btn-outline text-xs py-1.5 px-3 text-error border-error/30">Tolak</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== HISTORI INVOICE ==================== -->
+      <div id="page-histori-invoice" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Histori Invoice</h1><p class="text-secondary text-sm">Riwayat semua invoice yang pernah diterbitkan</p></div>
+          <div class="flex gap-2">
+            <select class="select-field w-auto"><option>Semua Status</option><option>Lunas</option><option>Pending</option><option>Ditolak</option></select>
+            <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option><option>Februari 2026</option></select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>No. Invoice</th><th>Siswa</th><th>Paket</th><th>Nominal</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium text-primary">INV-2026-0041</td><td>Andi Pratama</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>7 Apr 2026</td><td><span class="badge badge-warning">Pending</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cetak PDF</button></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0036</td><td>Putri Ayu</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>1 Apr 2026</td><td><span class="badge badge-success">Lunas</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cetak PDF</button></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0035</td><td>Riko Saputra</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>28 Mar 2026</td><td><span class="badge badge-success">Lunas</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cetak PDF</button></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0034</td><td>Maya Putri</td><td>Keluarga 4 org</td><td class="font-medium">Rp1.200.000</td><td>25 Mar 2026</td><td><span class="badge badge-success">Lunas</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cetak PDF</button></td></tr>
+              <tr><td class="font-medium text-primary">INV-2026-0033</td><td>Dimas Putra</td><td>Reguler 4x</td><td class="font-medium">Rp400.000</td><td>20 Mar 2026</td><td><span class="badge badge-error">Ditolak</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cetak PDF</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== MONITOR PROGRESS ==================== -->
+      <div id="page-monitor-progress" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Monitor Progress Siswa</h1><p class="text-secondary text-sm">Pantau perkembangan level siswa & deteksi stagnansi</p></div>
+          <div class="flex gap-2">
+            <select class="select-field w-auto"><option>Semua Pelatih</option><option>Coach Rina</option><option>Coach Budi</option><option>Coach Dian</option><option>Coach Arif</option></select>
+            <select class="select-field w-auto"><option>Semua Status</option><option>Meningkat</option><option>Stagnan</option><option>Kritis</option></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="trending-up" class="size-5 text-success"></i></div><p class="text-sm text-secondary">Meningkat</p></div><p class="font-bold text-2xl text-success">89 siswa</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-warning-light rounded-xl flex items-center justify-center"><i data-lucide="minus" class="size-5 text-warning"></i></div><p class="text-sm text-secondary">Stagnan</p></div><p class="font-bold text-2xl text-warning">34 siswa</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-error-light rounded-xl flex items-center justify-center"><i data-lucide="alert-triangle" class="size-5 text-error"></i></div><p class="text-sm text-secondary">Kritis (>3 bln)</p></div><p class="font-bold text-2xl text-error">4 siswa</p></div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Siswa</th><th>Pelatih</th><th>Level Bulan Lalu</th><th>Level Sekarang</th><th>Perubahan</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Andi Pratama</td><td>Coach Rina</td><td>Level 3</td><td>Level 3</td><td class="text-warning font-medium">—</td><td><span class="badge badge-warning">Stagnan 2 bln</span></td></tr>
+              <tr><td class="font-medium">Sari Dewi</td><td>Coach Budi</td><td>Level 2</td><td>Level 2</td><td class="text-error font-medium">—</td><td><span class="badge badge-error">Kritis 3 bln</span></td></tr>
+              <tr><td class="font-medium">Riko Saputra</td><td>Coach Rina</td><td>Level 3</td><td>Level 4</td><td class="text-success font-medium">↑ +1</td><td><span class="badge badge-success">Meningkat</span></td></tr>
+              <tr><td class="font-medium">Bima Arya</td><td>Coach Arif</td><td>Level 2</td><td>Level 3</td><td class="text-success font-medium">↑ +1</td><td><span class="badge badge-success">Meningkat</span></td></tr>
+              <tr><td class="font-medium">Maya Putri</td><td>Coach Dian</td><td>Level 1</td><td>Level 1</td><td class="text-error font-medium">—</td><td><span class="badge badge-error">Kritis 4 bln</span></td></tr>
+              <tr><td class="font-medium">Lina Sari</td><td>Coach Budi</td><td>Level 4</td><td>Level 5</td><td class="text-success font-medium">↑ +1</td><td><span class="badge badge-success">Meningkat</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== RAPOT ==================== -->
+      <div id="page-rapot" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Rapot Bulanan & 6 Bulan</h1><p class="text-secondary text-sm">Lihat rapot yang diinput pelatih untuk setiap siswa</p></div>
+          <div class="flex gap-2">
+            <select class="select-field w-auto"><option>Rapot Bulanan</option><option>Rapot 6 Bulan</option></select>
+            <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option></select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Siswa</th><th>Pelatih</th><th>Tipe</th><th>Periode</th><th>Level Awal</th><th>Level Akhir</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Andi Pratama</td><td>Coach Rina</td><td><span class="badge badge-primary">Bulanan</span></td><td>Apr 2026</td><td>Level 3</td><td>Level 3</td><td><span class="badge badge-warning">Stagnan</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Rapot</button></td></tr>
+              <tr><td class="font-medium">Riko Saputra</td><td>Coach Rina</td><td><span class="badge badge-primary">Bulanan</span></td><td>Apr 2026</td><td>Level 3</td><td>Level 4</td><td><span class="badge badge-success">Naik Level</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Rapot</button></td></tr>
+              <tr><td class="font-medium">Lina Sari</td><td>Coach Budi</td><td><span class="badge badge-muted">6 Bulan</span></td><td>Okt 2025 - Mar 2026</td><td>Level 2</td><td>Level 5</td><td><span class="badge badge-success">Excellent</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Rapot</button></td></tr>
+              <tr><td class="font-medium">Maya Putri</td><td>Coach Dian</td><td><span class="badge badge-primary">Bulanan</span></td><td>Apr 2026</td><td>Level 1</td><td>Level 1</td><td><span class="badge badge-error">Kritis</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Rapot</button></td></tr>
+              <tr><td class="font-medium">Bima Arya</td><td>Coach Arif</td><td><span class="badge badge-primary">Bulanan</span></td><td>Apr 2026</td><td>Level 2</td><td>Level 3</td><td><span class="badge badge-success">Naik Level</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Lihat Rapot</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== REKAP PEMASUKAN ==================== -->
+      <div id="page-rekap-pemasukan" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Rekap Pemasukan</h1><p class="text-secondary text-sm">Pemasukan otomatis dari pembayaran paket siswa yang dikonfirmasi</p></div>
+          <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option><option>Februari 2026</option></select>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="trending-up" class="size-5 text-success"></i></div><p class="text-sm text-secondary">Total Pemasukan</p></div><p class="font-bold text-2xl text-success">Rp42.500.000</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="receipt" class="size-5 text-primary"></i></div><p class="text-sm text-secondary">Invoice Lunas</p></div><p class="font-bold text-2xl">54 invoice</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-warning-light rounded-xl flex items-center justify-center"><i data-lucide="clock" class="size-5 text-warning"></i></div><p class="text-sm text-secondary">Masih Pending</p></div><p class="font-bold text-2xl text-warning">5 invoice</p></div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Tanggal</th><th>Invoice</th><th>Siswa</th><th>Paket</th><th>Nominal</th><th>Sumber</th></tr></thead>
+            <tbody>
+              <tr><td>7 Apr</td><td class="font-medium text-primary">INV-0041</td><td>Andi Pratama</td><td>Premium 8x</td><td class="font-medium text-success">+Rp750.000</td><td><span class="badge badge-success">Perpanjangan</span></td></tr>
+              <tr><td>5 Apr</td><td class="font-medium text-primary">INV-0039</td><td>Kel. Santoso</td><td>Keluarga 2</td><td class="font-medium text-success">+Rp700.000</td><td><span class="badge badge-primary">Pendaftaran</span></td></tr>
+              <tr><td>1 Apr</td><td class="font-medium text-primary">INV-0036</td><td>Putri Ayu</td><td>Premium 8x</td><td class="font-medium text-success">+Rp750.000</td><td><span class="badge badge-success">Perpanjangan</span></td></tr>
+              <tr><td>28 Mar</td><td class="font-medium text-primary">INV-0035</td><td>Riko Saputra</td><td>Premium 8x</td><td class="font-medium text-success">+Rp750.000</td><td><span class="badge badge-success">Perpanjangan</span></td></tr>
+              <tr><td>25 Mar</td><td class="font-medium text-primary">INV-0034</td><td>Maya Putri</td><td>Keluarga 4</td><td class="font-medium text-success">+Rp1.200.000</td><td><span class="badge badge-primary">Pendaftaran</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== PEMASUKAN LAINNYA ==================== -->
+      <div id="page-pemasukan-lainnya" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Pemasukan Lainnya</h1><p class="text-secondary text-sm">Input pemasukan manual dari sponsor, sewa kolam, dll</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Pemasukan</button>
+        </div>
+        <div class="card mb-6">
+          <h3 class="font-bold text-foreground mb-4">Input Pemasukan Manual</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div><label class="label-field">Kategori</label><select class="select-field"><option>Pilih Kategori</option><option>Sponsor</option><option>Sewa Kolam</option><option>Penjualan Perlengkapan</option><option>Event Renang</option><option>Lainnya</option></select></div>
+            <div><label class="label-field">Nominal (Rp)</label><input type="text" class="input-field" placeholder="1000000"></div>
+            <div><label class="label-field">Tanggal</label><input type="date" class="input-field"></div>
+            <div><label class="label-field">Keterangan</label><input type="text" class="input-field" placeholder="Deskripsi pemasukan..."></div>
+          </div>
+          <button class="btn-primary mt-4 flex items-center gap-2"><i data-lucide="save" class="size-4"></i>Simpan</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Tanggal</th><th>Kategori</th><th>Nominal</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td>5 Apr 2026</td><td><span class="badge badge-primary">Sponsor</span></td><td class="font-medium text-success">+Rp5.000.000</td><td>Sponsorship PT Aquatech untuk event bulanan</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+              <tr><td>2 Apr 2026</td><td><span class="badge badge-muted">Sewa Kolam</span></td><td class="font-medium text-success">+Rp2.000.000</td><td>Sewa kolam utama untuk event sekolah</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+              <tr><td>28 Mar 2026</td><td><span class="badge badge-muted">Perlengkapan</span></td><td class="font-medium text-success">+Rp800.000</td><td>Penjualan kacamata renang & baju renang</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== PIUTANG PENDING ==================== -->
+      <div id="page-piutang-pending" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Piutang Pending</h1><p class="text-secondary text-sm">Siswa yang pembayarannya belum lunas atau belum dikonfirmasi</p></div>
+          <div class="stat-card inline-flex !flex-row !items-center !gap-3 !p-3"><div class="size-10 bg-error-light rounded-xl flex items-center justify-center"><i data-lucide="alert-circle" class="size-5 text-error"></i></div><div><p class="text-xs text-secondary">Total Piutang</p><p class="font-bold text-lg text-error">Rp3.000.000</p></div></div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Siswa</th><th>Invoice</th><th>Paket</th><th>Nominal</th><th>Jatuh Tempo</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Andi Pratama</td><td class="text-primary">INV-0041</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>14 Apr 2026</td><td><span class="badge badge-warning">Menunggu Verifikasi</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cek Bukti</button></td></tr>
+              <tr><td class="font-medium">Sari Dewi</td><td class="text-primary">INV-0040</td><td>Reguler 4x</td><td class="font-medium">Rp400.000</td><td>13 Apr 2026</td><td><span class="badge badge-warning">Menunggu Verifikasi</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cek Bukti</button></td></tr>
+              <tr><td class="font-medium">Bima Arya</td><td class="text-primary">INV-0038</td><td>Reguler 4x</td><td class="font-medium">Rp400.000</td><td>11 Apr 2026</td><td><span class="badge badge-error">Belum Bayar</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Kirim Reminder</button></td></tr>
+              <tr><td class="font-medium">Lina Sari</td><td class="text-primary">INV-0037</td><td>Premium 8x</td><td class="font-medium">Rp750.000</td><td>10 Apr 2026</td><td><span class="badge badge-warning">Menunggu Verifikasi</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cek Bukti</button></td></tr>
+              <tr><td class="font-medium">Kel. Santoso</td><td class="text-primary">INV-0039</td><td>Keluarga 2</td><td class="font-medium">Rp700.000</td><td>12 Apr 2026</td><td><span class="badge badge-warning">Menunggu Verifikasi</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Cek Bukti</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== GAJI PELATIH (KEUANGAN) ==================== -->
+      <div id="page-gaji-pelatih" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Gaji Pelatih</h1><p class="text-secondary text-sm">Rekap slip gaji per pelatih per bulan: tarif × sesi - potongan</p></div>
+          <div class="flex gap-2">
+            <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option></select>
+            <button class="btn-outline flex items-center gap-2"><i data-lucide="printer" class="size-4"></i>Cetak Semua</button>
+          </div>
+        </div>
+        <div class="text-xs text-secondary bg-primary-light rounded-xl p-3 mb-5 flex items-start gap-2"><i data-lucide="info" class="size-4 text-primary shrink-0 mt-0.5"></i><span>Tarif per sesi: 1 siswa = Rp70k, 2 siswa = Rp80k, 3 siswa = Rp90k, 4-5 siswa = Rp100k. Potongan terlambat (>10 menit) = Rp50.000/sesi.</span></div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Pelatih</th><th>Total Sesi</th><th>Rata-rata Siswa</th><th>Gaji Kotor</th><th>Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Coach Rina</td><td>52</td><td>3.2 siswa</td><td class="font-medium">Rp5.200.000</td><td class="text-error font-medium">-Rp100.000</td><td class="text-primary font-bold">Rp5.100.000</td><td><button class="btn-outline text-xs py-1.5">Cetak Slip</button></td></tr>
+              <tr><td class="font-medium">Coach Budi</td><td>48</td><td>2.5 siswa</td><td class="font-medium">Rp4.320.000</td><td class="text-error font-medium">-Rp350.000</td><td class="text-primary font-bold">Rp3.970.000</td><td><button class="btn-outline text-xs py-1.5">Cetak Slip</button></td></tr>
+              <tr><td class="font-medium">Coach Dian</td><td>40</td><td>1.8 siswa</td><td class="font-medium">Rp3.200.000</td><td class="text-error font-medium">-Rp50.000</td><td class="text-primary font-bold">Rp3.150.000</td><td><button class="btn-outline text-xs py-1.5">Cetak Slip</button></td></tr>
+              <tr><td class="font-medium">Coach Arif</td><td>44</td><td>4.1 siswa</td><td class="font-medium">Rp4.400.000</td><td class="text-error font-medium">-Rp200.000</td><td class="text-primary font-bold">Rp4.200.000</td><td><button class="btn-outline text-xs py-1.5">Cetak Slip</button></td></tr>
+            </tbody>
+            <tfoot><tr class="bg-muted"><td class="px-5 py-3 font-bold" colspan="3">TOTAL</td><td class="px-5 py-3 font-bold">Rp17.120.000</td><td class="px-5 py-3 font-bold text-error">-Rp700.000</td><td class="px-5 py-3 font-bold text-primary">Rp16.420.000</td><td></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== FIXED COST ==================== -->
+      <div id="page-fixed-cost" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Fixed Cost</h1><p class="text-secondary text-sm">Biaya tetap bulanan: sewa kolam, listrik, perlengkapan, dll</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Fixed Cost</button>
+        </div>
+        <div class="card mb-6">
+          <h3 class="font-bold text-foreground mb-4">Input Fixed Cost</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div><label class="label-field">Kategori</label><select class="select-field"><option>Sewa Kolam</option><option>Listrik & Air</option><option>Perlengkapan Renang</option><option>Asuransi</option><option>Internet/Sistem</option><option>Lainnya</option></select></div>
+            <div><label class="label-field">Nominal (Rp)</label><input type="text" class="input-field" placeholder="5000000"></div>
+            <div><label class="label-field">Bulan</label><select class="select-field"><option>April 2026</option><option>Mei 2026</option></select></div>
+            <div><label class="label-field">Keterangan</label><input type="text" class="input-field" placeholder="Catatan..."></div>
+          </div>
+          <button class="btn-primary mt-4 flex items-center gap-2"><i data-lucide="save" class="size-4"></i>Simpan</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Kategori</th><th>Nominal/Bulan</th><th>Keterangan</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td class="font-medium">Sewa Kolam Utama</td><td class="text-error font-medium">-Rp5.000.000</td><td>Kontrak tahunan</td><td><span class="badge badge-success">Rutin</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button></td></tr>
+              <tr><td class="font-medium">Sewa Kolam Timur</td><td class="text-error font-medium">-Rp3.500.000</td><td>Kontrak 6 bulan</td><td><span class="badge badge-success">Rutin</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button></td></tr>
+              <tr><td class="font-medium">Listrik & Air</td><td class="text-error font-medium">-Rp1.200.000</td><td>Estimasi rata-rata</td><td><span class="badge badge-success">Rutin</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button></td></tr>
+              <tr><td class="font-medium">Perlengkapan Renang</td><td class="text-error font-medium">-Rp500.000</td><td>Pelampung, papan, dll</td><td><span class="badge badge-success">Rutin</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button></td></tr>
+              <tr><td class="font-medium">Internet & Sistem</td><td class="text-error font-medium">-Rp300.000</td><td>Hosting + domain</td><td><span class="badge badge-success">Rutin</span></td><td><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button></td></tr>
+            </tbody>
+            <tfoot><tr class="bg-muted"><td class="px-5 py-3 font-bold">TOTAL FIXED COST</td><td class="px-5 py-3 font-bold text-error">-Rp10.500.000</td><td colspan="3"></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== VARIABLE COST ==================== -->
+      <div id="page-variable-cost" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Variable Cost</h1><p class="text-secondary text-sm">Biaya tidak terduga: perbaikan, promosi, event, dll</p></div>
+          <button class="btn-primary flex items-center gap-2 shrink-0"><i data-lucide="plus" class="size-4"></i>Tambah Pengeluaran</button>
+        </div>
+        <div class="card mb-6">
+          <h3 class="font-bold text-foreground mb-4">Input Variable Cost</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div><label class="label-field">Kategori</label><select class="select-field"><option>Perbaikan</option><option>Promosi/Marketing</option><option>Event</option><option>Transport</option><option>Lainnya</option></select></div>
+            <div><label class="label-field">Nominal (Rp)</label><input type="text" class="input-field" placeholder="500000"></div>
+            <div><label class="label-field">Tanggal</label><input type="date" class="input-field"></div>
+            <div><label class="label-field">Keterangan</label><input type="text" class="input-field" placeholder="Deskripsi pengeluaran..."></div>
+          </div>
+          <button class="btn-primary mt-4 flex items-center gap-2"><i data-lucide="save" class="size-4"></i>Simpan</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Tanggal</th><th>Kategori</th><th>Nominal</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td>6 Apr 2026</td><td><span class="badge badge-warning">Perbaikan</span></td><td class="text-error font-medium">-Rp750.000</td><td>Perbaikan pompa filter kolam utama</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+              <tr><td>3 Apr 2026</td><td><span class="badge badge-primary">Promosi</span></td><td class="text-error font-medium">-Rp400.000</td><td>Cetak brosur + banner promo April</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+              <tr><td>1 Apr 2026</td><td><span class="badge badge-muted">Transport</span></td><td class="text-error font-medium">-Rp200.000</td><td>Transport pelatih ke kolam cabang</td><td><div class="flex gap-2"><button class="text-primary hover:underline text-sm cursor-pointer">Edit</button><button class="text-error hover:underline text-sm cursor-pointer">Hapus</button></div></td></tr>
+            </tbody>
+            <tfoot><tr class="bg-muted"><td class="px-5 py-3 font-bold" colspan="2">TOTAL BULAN INI</td><td class="px-5 py-3 font-bold text-error">-Rp1.350.000</td><td colspan="2"></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== P&L BULANAN ==================== -->
+      <div id="page-pnl-bulanan" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">P&L Bulanan</h1><p class="text-secondary text-sm">Profit & Loss: Pemasukan - Pengeluaran = Laba Bersih</p></div>
+          <select class="select-field w-auto"><option>April 2026</option><option>Maret 2026</option><option>Februari 2026</option></select>
+        </div>
+        <!-- P&L Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="arrow-up-right" class="size-5 text-success"></i></div><p class="text-sm text-secondary">Total Pemasukan</p></div><p class="font-bold text-2xl text-success">Rp42.500.000</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-error-light rounded-xl flex items-center justify-center"><i data-lucide="arrow-down-right" class="size-5 text-error"></i></div><p class="text-sm text-secondary">Total Pengeluaran</p></div><p class="font-bold text-2xl text-error">Rp28.270.000</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="sparkles" class="size-5 text-primary"></i></div><p class="text-sm text-secondary">Laba Bersih</p></div><p class="font-bold text-2xl text-primary">Rp14.230.000</p></div>
+          <div class="stat-card"><div class="flex items-center gap-2"><div class="size-10 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="percent" class="size-5 text-primary"></i></div><p class="text-sm text-secondary">Margin</p></div><p class="font-bold text-2xl">33.5%</p></div>
+        </div>
+        <!-- P&L Detail Table -->
+        <div class="card">
+          <h3 class="font-bold text-foreground mb-4">Detail P&L — April 2026</h3>
+          <div class="table-container">
+            <table class="data-table">
+              <thead><tr><th>Komponen</th><th>Detail</th><th class="text-right">Nominal</th></tr></thead>
+              <tbody>
+                <tr class="bg-success-light/30"><td class="font-bold text-success" colspan="2">PEMASUKAN</td><td class="text-right font-bold text-success">Rp42.500.000</td></tr>
+                <tr><td class="pl-8">Pembayaran Paket Siswa</td><td class="text-secondary text-sm">54 invoice lunas</td><td class="text-right font-medium">Rp34.700.000</td></tr>
+                <tr><td class="pl-8">Sponsor & Lainnya</td><td class="text-secondary text-sm">3 transaksi manual</td><td class="text-right font-medium">Rp7.800.000</td></tr>
+                <tr class="bg-error-light/30"><td class="font-bold text-error" colspan="2">PENGELUARAN</td><td class="text-right font-bold text-error">-Rp28.270.000</td></tr>
+                <tr><td class="pl-8">Gaji Pelatih (Bersih)</td><td class="text-secondary text-sm">4 pelatih × sesi - potongan</td><td class="text-right font-medium text-error">-Rp16.420.000</td></tr>
+                <tr><td class="pl-8">Fixed Cost</td><td class="text-secondary text-sm">Sewa, listrik, perlengkapan</td><td class="text-right font-medium text-error">-Rp10.500.000</td></tr>
+                <tr><td class="pl-8">Variable Cost</td><td class="text-secondary text-sm">Perbaikan, promosi, transport</td><td class="text-right font-medium text-error">-Rp1.350.000</td></tr>
+              </tbody>
+              <tfoot>
+                <tr class="bg-primary-light"><td class="px-5 py-4 font-bold text-lg text-primary" colspan="2">LABA BERSIH</td><td class="px-5 py-4 text-right font-bold text-lg text-primary">Rp14.230.000</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CASHFLOW ==================== -->
+      <div id="page-cashflow" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Cashflow</h1><p class="text-secondary text-sm">Grafik tren arus kas 6/12 bulan terakhir</p></div>
+          <select class="select-field w-auto" id="cashflow-period"><option value="6">6 Bulan Terakhir</option><option value="12">12 Bulan Terakhir</option></select>
+        </div>
+        <div class="card mb-6">
+          <div class="w-full h-[350px]"><canvas id="cashflowDetailChart"></canvas></div>
+        </div>
+        <!-- Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="card">
+            <h3 class="font-bold text-foreground mb-4">Breakdown Pengeluaran</h3>
+            <div class="w-full h-[250px]"><canvas id="expenseBreakdownChart"></canvas></div>
+          </div>
+          <div class="card">
+            <h3 class="font-bold text-foreground mb-4">Ringkasan 6 Bulan</h3>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center justify-between p-3 bg-success-light/30 rounded-xl"><span class="text-sm font-medium">Total Pemasukan</span><span class="font-bold text-success">Rp241.500.000</span></div>
+              <div class="flex items-center justify-between p-3 bg-error-light/30 rounded-xl"><span class="text-sm font-medium">Total Pengeluaran</span><span class="font-bold text-error">Rp175.200.000</span></div>
+              <div class="flex items-center justify-between p-3 bg-primary-light rounded-xl"><span class="text-sm font-bold">Total Laba Bersih</span><span class="font-bold text-primary text-lg">Rp66.300.000</span></div>
+              <div class="flex items-center justify-between p-3 bg-muted rounded-xl"><span class="text-sm font-medium">Rata-rata Laba/Bulan</span><span class="font-bold">Rp11.050.000</span></div>
+              <div class="flex items-center justify-between p-3 bg-muted rounded-xl"><span class="text-sm font-medium">Margin Rata-rata</span><span class="font-bold">27.4%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== EXPORT ==================== -->
+      <div id="page-export" class="content-section">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div><h1 class="page-title">Export Laporan</h1><p class="text-secondary text-sm">Download laporan keuangan dalam format PDF atau Excel</p></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <!-- P&L Export -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-primary-light rounded-xl flex items-center justify-center"><i data-lucide="bar-chart-3" class="size-6 text-primary"></i></div>
+              <div><p class="font-bold text-foreground">Laporan P&L</p><p class="text-xs text-secondary">Profit & Loss bulanan</p></div>
+            </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div><label class="label-field">Periode</label><select class="select-field"><option>April 2026</option><option>Maret 2026</option><option>Q1 2026</option><option>Tahun 2026</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="file-text" class="size-4"></i>PDF</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="table" class="size-4"></i>Excel</button>
+            </div>
+          </div>
+          <!-- Cashflow Export -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-success-light rounded-xl flex items-center justify-center"><i data-lucide="line-chart" class="size-6 text-success"></i></div>
+              <div><p class="font-bold text-foreground">Laporan Cashflow</p><p class="text-xs text-secondary">Tren arus kas</p></div>
+            </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div><label class="label-field">Rentang</label><select class="select-field"><option>6 Bulan Terakhir</option><option>12 Bulan Terakhir</option><option>Tahun 2026</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="file-text" class="size-4"></i>PDF</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="table" class="size-4"></i>Excel</button>
+            </div>
+          </div>
+          <!-- Gaji Export -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-warning-light rounded-xl flex items-center justify-center"><i data-lucide="banknote" class="size-6 text-warning"></i></div>
+              <div><p class="font-bold text-foreground">Slip Gaji Pelatih</p><p class="text-xs text-secondary">Rekap gaji semua pelatih</p></div>
+            </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div><label class="label-field">Bulan</label><select class="select-field"><option>April 2026</option><option>Maret 2026</option><option>Februari 2026</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="file-text" class="size-4"></i>PDF</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="table" class="size-4"></i>Excel</button>
+            </div>
+          </div>
+          <!-- Invoice Export -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-blue-50 rounded-xl flex items-center justify-center"><i data-lucide="receipt" class="size-6 text-blue-500"></i></div>
+              <div><p class="font-bold text-foreground">Rekap Invoice</p><p class="text-xs text-secondary">Semua invoice + status</p></div>
+            </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div><label class="label-field">Periode</label><select class="select-field"><option>April 2026</option><option>Q1 2026</option><option>Tahun 2026</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="file-text" class="size-4"></i>PDF</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="table" class="size-4"></i>Excel</button>
+            </div>
+          </div>
+          <!-- Pengeluaran Full Export -->
+          <div class="card hover:shadow-md hover:border-primary-soft transition-all">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="size-12 bg-error-light rounded-xl flex items-center justify-center"><i data-lucide="wallet" class="size-6 text-error"></i></div>
+              <div><p class="font-bold text-foreground">Rekap Pengeluaran</p><p class="text-xs text-secondary">Fixed + Variable + Gaji</p></div>
+            </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div><label class="label-field">Periode</label><select class="select-field"><option>April 2026</option><option>Q1 2026</option><option>Tahun 2026</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn-primary flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="file-text" class="size-4"></i>PDF</button>
+              <button class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs"><i data-lucide="table" class="size-4"></i>Excel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </main>
+</div>
+
+<script>
+// Page title map
+const pageTitles = {
+  'dashboard': 'Dashboard',
+  'daftar-siswa': 'Daftar Siswa',
+  'pendaftar-baru': 'Pendaftar Baru',
+  'paket-langganan': 'Paket Langganan',
+  'daftar-pelatih': 'Daftar Pelatih',
+  'rekap-kehadiran': 'Rekap Kehadiran Pelatih',
+  'potongan-gaji': 'Potongan Gaji',
+  'kalender-jadwal': 'Kalender Jadwal',
+  'atur-jadwal': 'Atur Jadwal',
+  'lokasi-kolam': 'Lokasi Kolam',
+  'pembayaran-pending': 'Pembayaran Pending',
+  'histori-invoice': 'Histori Invoice',
+  'monitor-progress': 'Monitor Progress Siswa',
+  'rapot': 'Rapot Bulanan & 6 Bulan',
+  'rekap-pemasukan': 'Rekap Pemasukan',
+  'pemasukan-lainnya': 'Pemasukan Lainnya',
+  'piutang-pending': 'Piutang Pending',
+  'gaji-pelatih': 'Gaji Pelatih',
+  'fixed-cost': 'Fixed Cost',
+  'variable-cost': 'Variable Cost',
+  'pnl-bulanan': 'P&L Bulanan',
+  'cashflow': 'Cashflow',
+  'export': 'Export Laporan'
+};
+
+function navigateTo(pageId) {
+  // Hide all sections
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  // Show target
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+  // Update header
+  document.getElementById('header-title').textContent = pageTitles[pageId] || 'Dashboard';
+  // Update sidebar active state
+  document.querySelectorAll('[data-page]').forEach(link => {
+    link.classList.remove('active');
+    if (link.dataset.page === pageId) link.classList.add('active');
+  });
+  // Auto-open parent submenu
+  const parentSubmenu = document.querySelector('[data-page="' + pageId + '"]')?.closest('.submenu-container');
+  if (parentSubmenu) parentSubmenu.classList.add('open');
+  // Close mobile sidebar
+  if (window.innerWidth < 1024) toggleSidebar();
+  // Scroll to top
+  document.querySelector('.overflow-y-auto')?.scrollTo(0, 0);
+  // Reinit icons
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+  // Init charts if needed
+  if (pageId === 'dashboard') setTimeout(initDashboardCharts, 100);
+  if (pageId === 'cashflow') setTimeout(initCashflowCharts, 100);
+  if (pageId === 'kalender-jadwal') setTimeout(renderCalendar, 100);
+}
+
+function toggleSubmenu(menuId) {
+  const sub = document.getElementById('submenu-' + menuId);
+  const arrow = document.getElementById('arrow-' + menuId);
+  if (sub) sub.classList.toggle('open');
+  if (arrow) arrow.style.transform = sub.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+  document.body.classList.toggle('overflow-hidden');
+}
+
+let dashboardChartsInit = false;
+function initDashboardCharts() {
+  if (dashboardChartsInit) return;
+  const ctx = document.getElementById('cashflowChart');
+  if (!ctx) return;
+  dashboardChartsInit = true;
+  new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr'],
+      datasets: [
+        { label: 'Pemasukan', data: [38, 41, 35, 40, 44, 42.5], backgroundColor: '#4AAF94', borderRadius: 6, barPercentage: 0.6 },
+        { label: 'Pengeluaran', data: [28, 30, 27, 29, 31, 30], backgroundColor: '#ED6B60', borderRadius: 6, barPercentage: 0.6 },
+        { label: 'Laba Bersih', data: [10, 11, 8, 11, 13, 12.5], backgroundColor: '#AAD2C7', borderRadius: 6, barPercentage: 0.6 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: "'Lexend Deca'", size: 11 }, usePointStyle: true, padding: 20 } },
+        tooltip: { backgroundColor: '#111', padding: 12, displayColors: true, callbacks: { label: ctx => ctx.dataset.label + ': Rp' + ctx.raw + 'jt' } }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#E8ECE9' }, ticks: { font: { family: "'Lexend Deca'", size: 11 }, color: '#6B7A8D', callback: v => 'Rp' + v + 'jt' }, border: { display: false } },
+        x: { grid: { display: false }, ticks: { font: { family: "'Lexend Deca'", size: 11 }, color: '#6B7A8D' }, border: { display: false } }
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.lucide) lucide.createIcons();
+  initDashboardCharts();
+});
+
+let cashflowDetailInit = false;
+function initCashflowCharts() {
+  if (cashflowDetailInit) return;
+  const ctx1 = document.getElementById('cashflowDetailChart');
+  const ctx2 = document.getElementById('expenseBreakdownChart');
+  if (!ctx1 || !ctx2) return;
+  cashflowDetailInit = true;
+  
+  // Line chart
+  const g = ctx1.getContext('2d').createLinearGradient(0, 0, 0, 350);
+  g.addColorStop(0, 'rgba(74,175,148,0.15)'); g.addColorStop(1, 'rgba(74,175,148,0)');
+  new Chart(ctx1.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: ['Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr'],
+      datasets: [
+        { label: 'Pemasukan', data: [38, 41, 35, 40, 44, 42.5], borderColor: '#4AAF94', backgroundColor: g, fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2 },
+        { label: 'Pengeluaran', data: [28, 30, 27, 29, 31, 28.3], borderColor: '#ED6B60', tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2, borderDash: [5,5] },
+        { label: 'Laba Bersih', data: [10, 11, 8, 11, 13, 14.2], borderColor: '#AAD2C7', tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: "'Lexend Deca'", size: 11 }, usePointStyle: true, padding: 20 } },
+        tooltip: { backgroundColor: '#111', padding: 12, callbacks: { label: c => c.dataset.label + ': Rp' + c.raw + 'jt' } }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#E8ECE9' }, ticks: { font: { family: "'Lexend Deca'", size: 11 }, color: '#6B7A8D', callback: v => 'Rp' + v + 'jt' }, border: { display: false } },
+        x: { grid: { display: false }, ticks: { font: { family: "'Lexend Deca'", size: 11 }, color: '#6B7A8D' }, border: { display: false } }
+      }
+    }
+  });
+  
+  // Doughnut
+  new Chart(ctx2.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Gaji Pelatih', 'Sewa Kolam', 'Listrik & Air', 'Perlengkapan', 'Variable Cost'],
+      datasets: [{ data: [16.42, 8.5, 1.2, 0.5, 1.35], backgroundColor: ['#4AAF94', '#ED6B60', '#F5A623', '#AAD2C7', '#6B7A8D'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { position: 'bottom', labels: { font: { family: "'Lexend Deca'", size: 10 }, usePointStyle: true, padding: 12 } },
+        tooltip: { backgroundColor: '#111', padding: 12, callbacks: { label: c => c.label + ': Rp' + c.raw + 'jt' } }
+      }
+    }
+  });
+}
+
+// ==================== INTERACTIVE CALENDAR ====================
+const DAYS_ID = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+let calYear = 2026, calMonth = 3; // April 2026 (0-indexed)
+
+const allStudents = ['Andi Pratama','Sari Dewi','Riko Saputra','Bima Arya','Maya Putri','Lina Sari','Putri Ayu','Dimas Putra'];
+
+// Session data
+let calSessions = [
+  // Week 1 (Apr 7-12)
+  {id:1,date:'2026-04-07',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama','Riko Saputra','Putri Ayu']},
+  {id:2,date:'2026-04-07',time:'09:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Dimas Putra']},
+  {id:3,date:'2026-04-08',time:'09:00',coach:'dian',pool:'Kolam Utama',max:3,students:['Maya Putri']},
+  {id:4,date:'2026-04-08',time:'14:00',coach:'arif',pool:'Kolam Timur',max:5,students:['Andi Pratama','Sari Dewi','Lina Sari','Bima Arya']},
+  {id:5,date:'2026-04-09',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Riko Saputra','Putri Ayu']},
+  {id:6,date:'2026-04-09',time:'09:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Dimas Putra','Sari Dewi']},
+  {id:7,date:'2026-04-10',time:'09:00',coach:'dian',pool:'Kolam Utama',max:3,students:['Maya Putri','Lina Sari']},
+  {id:8,date:'2026-04-10',time:'14:00',coach:'arif',pool:'Kolam Timur',max:5,students:['Andi Pratama','Riko Saputra','Putri Ayu']},
+  {id:9,date:'2026-04-11',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama','Riko Saputra','Putri Ayu','Sari Dewi']},
+  {id:10,date:'2026-04-11',time:'16:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Dimas Putra']},
+  {id:11,date:'2026-04-12',time:'09:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Riko Saputra','Putri Ayu','Lina Sari']},
+  {id:12,date:'2026-04-12',time:'14:00',coach:'arif',pool:'Kolam Utama',max:5,students:['Andi Pratama','Sari Dewi','Bima Arya','Maya Putri','Dimas Putra']},
+  {id:13,date:'2026-04-12',time:'16:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Dimas Putra','Sari Dewi','Lina Sari']},
+  // Week 2
+  {id:14,date:'2026-04-14',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama','Putri Ayu','Riko Saputra']},
+  {id:15,date:'2026-04-14',time:'09:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Sari Dewi']},
+  {id:16,date:'2026-04-15',time:'09:00',coach:'dian',pool:'Kolam Utama',max:3,students:['Maya Putri']},
+  {id:17,date:'2026-04-15',time:'14:00',coach:'arif',pool:'Kolam Timur',max:5,students:['Lina Sari','Dimas Putra','Andi Pratama']},
+  {id:18,date:'2026-04-16',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Riko Saputra','Putri Ayu']},
+  {id:19,date:'2026-04-17',time:'14:00',coach:'arif',pool:'Kolam Timur',max:5,students:['Bima Arya','Sari Dewi','Maya Putri']},
+  {id:20,date:'2026-04-18',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama','Riko Saputra','Putri Ayu']},
+  {id:21,date:'2026-04-19',time:'14:00',coach:'arif',pool:'Kolam Utama',max:5,students:['Lina Sari','Dimas Putra']},
+  // Week 3-4 sparse
+  {id:22,date:'2026-04-21',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama','Riko Saputra']},
+  {id:23,date:'2026-04-22',time:'09:00',coach:'dian',pool:'Kolam Utama',max:3,students:['Maya Putri','Lina Sari']},
+  {id:24,date:'2026-04-23',time:'09:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Bima Arya','Dimas Putra','Sari Dewi']},
+  {id:25,date:'2026-04-25',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Putri Ayu','Andi Pratama','Riko Saputra']},
+  {id:26,date:'2026-04-26',time:'14:00',coach:'arif',pool:'Kolam Timur',max:5,students:['Lina Sari','Bima Arya']},
+  {id:27,date:'2026-04-28',time:'07:00',coach:'rina',pool:'Kolam Utama',max:5,students:['Andi Pratama']},
+  {id:28,date:'2026-04-29',time:'09:00',coach:'dian',pool:'Kolam Utama',max:3,students:['Maya Putri']},
+  {id:29,date:'2026-04-30',time:'09:00',coach:'budi',pool:'Kolam Timur',max:5,students:['Sari Dewi','Dimas Putra']},
+];
+let nextId = 30;
+
+const coachNames = {rina:'Coach Rina',budi:'Coach Budi',dian:'Coach Dian',arif:'Coach Arif'};
+const coachCss = {rina:'coach-rina',budi:'coach-budi',dian:'coach-dian',arif:'coach-arif'};
+
+function calChangeMonth(d) { calMonth+=d; if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--} renderCalendar(); }
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  const filter = document.getElementById('cal-filter-coach')?.value || 'all';
+  document.getElementById('cal-month-title').textContent = MONTHS_ID[calMonth] + ' ' + calYear;
+  
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+  const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  
+  let html = '';
+  // Headers
+  DAYS_ID.forEach(d => html += `<div class="cal-header">${d}</div>`);
+  
+  // Previous month fill
+  for (let i = firstDay-1; i >= 0; i--) {
+    const day = daysInPrev - i;
+    html += `<div class="cal-cell other-month"><span class="cal-date">${day}</span></div>`;
+  }
+  
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday = dateStr === todayStr;
+    let sessions = calSessions.filter(s => s.date === dateStr);
+    if (filter !== 'all') sessions = sessions.filter(s => s.coach === filter);
+    
+    html += `<div class="cal-cell${isToday?' today':''}" onclick="openCreateModal('${dateStr}')">`;
+    html += `<span class="cal-date">${d}</span>`;
+    
+    const maxShow = 2;
+    sessions.slice(0, maxShow).forEach(s => {
+      html += `<div class="cal-event ${coachCss[s.coach]}" onclick="event.stopPropagation();openSessionModal(${s.id})" title="${coachNames[s.coach]} · ${s.time} · ${s.students.length}/${s.max} siswa">`;
+      html += `<b>${s.time}</b> ${coachNames[s.coach].replace('Coach ','')} (${s.students.length})`;
+      html += `</div>`;
+    });
+    if (sessions.length > maxShow) {
+      html += `<div class="cal-more" onclick="event.stopPropagation();showAllSessions('${dateStr}')">+${sessions.length - maxShow} lagi</div>`;
+    }
+    html += `</div>`;
+  }
+  
+  // Next month fill
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-cell other-month"><span class="cal-date">${i}</span></div>`;
+  }
+  
+  grid.innerHTML = html;
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+}
+
+function openSessionModal(sessionId) {
+  const s = calSessions.find(x => x.id === sessionId);
+  if (!s) return;
+  const modal = document.getElementById('session-modal');
+  const title = document.getElementById('modal-session-title');
+  const body = document.getElementById('modal-session-body');
+  
+  const dt = new Date(s.date);
+  const dayName = DAYS_ID[dt.getDay()];
+  const monthName = MONTHS_ID[dt.getMonth()];
+  title.textContent = `${coachNames[s.coach]} · ${dayName}, ${dt.getDate()} ${monthName}`;
+  
+  const isFull = s.students.length >= s.max;
+  const available = allStudents.filter(st => !s.students.includes(st));
+  
+  body.innerHTML = `
+    <div class="flex flex-col gap-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="flex flex-col items-center p-3 bg-primary-light rounded-xl"><span class="text-xs text-secondary">Jam</span><span class="font-bold text-foreground">${s.time}</span></div>
+        <div class="flex flex-col items-center p-3 bg-muted rounded-xl"><span class="text-xs text-secondary">Kolam</span><span class="font-bold text-foreground text-xs">${s.pool}</span></div>
+        <div class="flex flex-col items-center p-3 ${isFull?'bg-error-light':'bg-success-light'} rounded-xl"><span class="text-xs text-secondary">Kapasitas</span><span class="font-bold ${isFull?'text-error':'text-success'}">${s.students.length}/${s.max}</span></div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2"><span class="font-bold text-sm text-foreground">Daftar Siswa (${s.students.length})</span></div>
+        <div class="flex flex-col gap-1.5" id="modal-student-list">
+          ${s.students.map((st,i) => `
+            <div class="flex items-center justify-between p-2.5 bg-muted/50 rounded-xl group hover:bg-muted transition">
+              <div class="flex items-center gap-2.5">
+                <div class="size-8 rounded-lg bg-primary-light flex items-center justify-center text-xs font-bold text-primary">${st.split(' ').map(w=>w[0]).join('')}</div>
+                <span class="text-sm font-medium">${st}</span>
+              </div>
+              <button onclick="removeStudentFromSession(${s.id},'${st}')" class="size-7 rounded-lg bg-white border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:border-error hover:bg-error-light cursor-pointer" title="Hapus siswa"><i data-lucide="x" class="size-3.5 text-error"></i></button>
+            </div>
+          `).join('')}
+          ${s.students.length === 0 ? '<p class="text-sm text-secondary text-center py-4">Belum ada siswa di sesi ini</p>' : ''}
+        </div>
+      </div>
+      ${!isFull ? `
+      <div>
+        <span class="font-bold text-sm text-foreground mb-2 block">Tambah Siswa</span>
+        <div class="flex flex-wrap gap-1.5" id="modal-add-students">
+          ${available.map(st => `
+            <button onclick="addStudentToSession(${s.id},'${st}')" class="flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-border cursor-pointer hover:border-primary hover:bg-primary-light transition">
+              <i data-lucide="plus" class="size-3 text-primary"></i>${st}
+            </button>
+          `).join('')}
+          ${available.length === 0 ? '<p class="text-xs text-secondary">Semua siswa sudah terdaftar</p>' : ''}
+        </div>
+      </div>` : ''}
+      <div class="flex gap-2 pt-2 border-t border-border">
+        <button onclick="deleteSession(${s.id})" class="btn-outline flex-1 flex items-center justify-center gap-2 text-xs text-error border-error/30 hover:bg-error-light"><i data-lucide="trash-2" class="size-3.5"></i>Hapus Sesi</button>
+        <button onclick="closeSessionModal()" class="btn-primary flex-1 text-xs">Tutup</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('show');
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+}
+
+function closeSessionModal() { document.getElementById('session-modal').classList.remove('show'); }
+
+function addStudentToSession(sessionId, studentName) {
+  const s = calSessions.find(x => x.id === sessionId);
+  if (!s || s.students.length >= s.max) return;
+  s.students.push(studentName);
+  openSessionModal(sessionId);
+  renderCalendar();
+}
+
+function removeStudentFromSession(sessionId, studentName) {
+  const s = calSessions.find(x => x.id === sessionId);
+  if (!s) return;
+  s.students = s.students.filter(st => st !== studentName);
+  openSessionModal(sessionId);
+  renderCalendar();
+}
+
+function deleteSession(sessionId) {
+  if (!confirm('Hapus sesi ini?')) return;
+  calSessions = calSessions.filter(s => s.id !== sessionId);
+  closeSessionModal();
+  renderCalendar();
+}
+
+function showAllSessions(dateStr) {
+  const filter = document.getElementById('cal-filter-coach')?.value || 'all';
+  let sessions = calSessions.filter(s => s.date === dateStr);
+  if (filter !== 'all') sessions = sessions.filter(s => s.coach === filter);
+  
+  const dt = new Date(dateStr);
+  const title = document.getElementById('modal-session-title');
+  const body = document.getElementById('modal-session-body');
+  title.textContent = `Semua Sesi — ${DAYS_ID[dt.getDay()]}, ${dt.getDate()} ${MONTHS_ID[dt.getMonth()]}`;
+  
+  body.innerHTML = `<div class="flex flex-col gap-2">${sessions.map(s => `
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary-soft cursor-pointer transition" onclick="openSessionModal(${s.id})">
+      <div class="size-10 rounded-lg flex items-center justify-center shrink-0 cal-event ${coachCss[s.coach]}" style="border:none;margin:0;padding:0;font-size:0.75rem;font-weight:700">${s.time}</div>
+      <div class="flex-1"><p class="font-semibold text-sm">${coachNames[s.coach]}</p><p class="text-xs text-secondary">${s.pool} · ${s.students.length}/${s.max} siswa</p></div>
+      <i data-lucide="chevron-right" class="size-4 text-secondary"></i>
+    </div>
+  `).join('')}</div>`;
+  
+  document.getElementById('session-modal').classList.add('show');
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+}
+
+let createDate = '';
+function openCreateModal(dateStr) {
+  createDate = dateStr;
+  const dt = new Date(dateStr);
+  document.getElementById('create-date-label').textContent = `${DAYS_ID[dt.getDay()]}, ${dt.getDate()} ${MONTHS_ID[dt.getMonth()]} ${dt.getFullYear()}`;
+  document.getElementById('create-session-modal').classList.add('show');
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+}
+function closeCreateModal() { document.getElementById('create-session-modal').classList.remove('show'); }
+
+function handleCreateSession() {
+  const coach = document.getElementById('create-coach').value;
+  const time = document.getElementById('create-time').value;
+  const pool = document.getElementById('create-pool').value;
+  const max = parseInt(document.getElementById('create-max').value) || 5;
+  const checkboxes = document.querySelectorAll('#create-students-pool input[type=checkbox]:checked');
+  const students = Array.from(checkboxes).map(cb => cb.parentElement.textContent.trim());
+  
+  calSessions.push({id: nextId++, date: createDate, time, coach, pool, max, students});
+  closeCreateModal();
+  renderCalendar();
+  // Reset checkboxes
+  document.querySelectorAll('#create-students-pool input[type=checkbox]').forEach(cb => cb.checked = false);
+}
+
+// Filter change
+document.getElementById('cal-filter-coach')?.addEventListener('change', renderCalendar);
+</script>
+</body>
+</html>

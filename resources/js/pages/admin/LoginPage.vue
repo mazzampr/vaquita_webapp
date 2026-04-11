@@ -1,7 +1,8 @@
 <script setup>
 import { reactive, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '../../stores/auth';
+import heroImg from '../../hero.png';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -46,8 +47,17 @@ async function submitForm() {
 </script>
 
 <template>
-    <main class="flex min-h-screen items-center justify-center bg-slate-200 px-4 py-10">
-        <div class="w-full max-w-md rounded-xl bg-white p-8 shadow-xl shadow-slate-400/20">
+    <main class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+        <div class="absolute inset-0">
+            <img
+                :src="heroImg"
+                alt="Kolam renang"
+                class="h-full w-full object-cover blur-sm scale-110"
+            >
+            <div class="absolute inset-0 bg-slate-900/45"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-md rounded-xl border border-white/35 bg-white/90 p-8 shadow-xl shadow-slate-900/25 backdrop-blur-sm">
             <h1 class="text-2xl font-bold text-slate-900">
                 Login Sistem
             </h1>
@@ -120,6 +130,13 @@ async function submitForm() {
                     <span v-if="authStore.loadingLogin">Memproses...</span>
                     <span v-else>Masuk</span>
                 </button>
+
+                <RouterLink
+                    :to="{ name: 'register' }"
+                    class="inline-flex w-full items-center justify-center rounded-lg border border-cyan-700 px-4 py-2.5 font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                >
+                    Registrasi
+                </RouterLink>
             </form>
         </div>
     </main>

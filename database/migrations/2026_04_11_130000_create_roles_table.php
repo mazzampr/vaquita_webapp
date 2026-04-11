@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('id_users')->primary();
-            $table->string('nama_lengkap');
-            $table->string('email')->unique();
-            $table->timestamp('email_terverifikasi_pada')->nullable();
-            $table->string('kata_sandi');
+        Schema::create('roles', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_roles')->primary();
+            $table->string('nama_role')->unique();
+            $table->string('deskripsi')->nullable();
             $table->boolean('aktif')->default(true)->index();
             $table->timestamps();
             $table->softDeletes();
@@ -28,7 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };
 
