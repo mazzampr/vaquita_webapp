@@ -1,13 +1,16 @@
-# Template Task Fitur
+# Template Task Log
 
-Gunakan template ini untuk setiap fitur baru.
-Simpan sebagai: `doc/task/<nama-fitur>.task.md`.
+Gunakan template ini untuk setiap task yang mulai dikerjakan.
+Simpan sebagai: `doc/task/YYYY-MM-DD-nama-task.task.md`.
 
 ## 0. Metadata Singkat
 - Feature ID:
+- Task Log ID: `YYYY-MM-DD-nama-task`
 - Prioritas: `High` | `Medium` | `Low`
 - Status: `Planned` | `Ready` | `In Progress` | `Done` | `Blocked`
 - Owner:
+- Sumber fitur: `doc/fitur/fitur.md`
+- Referensi daftar pekerjaan: `doc/task.md`
 
 ## 1. Ringkasan Task
 - Judul:
@@ -16,6 +19,8 @@ Simpan sebagai: `doc/task/<nama-fitur>.task.md`.
 - Out of scope:
 
 ## 2. Detail Requirement
+> Untuk task fitur, bagian Backend dan Frontend wajib diisi dan dikerjakan. Boleh isi "Tidak relevan" hanya untuk task teknis `TECH-*`.
+
 ### Backend (Laravel)
 - Endpoint:
 - Method:
@@ -30,6 +35,14 @@ Simpan sebagai: `doc/task/<nama-fitur>.task.md`.
 - Perubahan UI utama:
 - State yang dibutuhkan:
 - Integrasi API:
+- Modal konfirmasi:
+  - Create:
+  - Update:
+  - Delete:
+- Modal sukses:
+  - Create:
+  - Update:
+  - Delete:
 - Loading state:
 - Empty state:
 - Error state:
@@ -68,6 +81,11 @@ Simpan sebagai: `doc/task/<nama-fitur>.task.md`.
 
 ## 7. Definition of Done
 - [ ] Requirement terpenuhi
+- [ ] Backend/API selesai dan terhubung ke data/logic yang benar
+- [ ] Frontend/UI selesai dan terhubung ke API
+- [ ] Modal konfirmasi tersedia untuk setiap aksi create/update/delete
+- [ ] Modal sukses tersedia untuk setiap aksi create/update/delete
+- [ ] State loading/empty/error frontend tersedia
 - [ ] Kode mengikuti `doc/standard-code.md`
 - [ ] Test/lint/check relevan lulus
 - [ ] Tidak ada regression yang diketahui
@@ -78,4 +96,11 @@ Simpan sebagai: `doc/task/<nama-fitur>.task.md`.
 - Kode final lengkap
 - Penjelasan singkat keputusan teknis
 - Catatan asumsi
+
+## 9. Log Pengerjaan
+### YYYY-MM-DD
+- Status:
+- Perubahan:
+- Test/check:
+- Catatan:
 
