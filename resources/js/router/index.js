@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import LandingPage from '../pages/LandingPage.vue';
-import LoginPage from '../pages/LoginPage.vue';
-import PortalPage from '../pages/PortalPage.vue';
+import LandingPage from '../pages/frontend/LandingPage.vue';
+import LoginPage from '../pages/admin/LoginPage.vue';
+import RegisterPage from '../pages/admin/RegisterPage.vue';
+import PortalPage from '../pages/admin/PortalPage.vue';
 
 const routes = [
     {
@@ -15,6 +16,12 @@ const routes = [
         path: '/login',
         name: 'login',
         component: LoginPage,
+        meta: { guest: true },
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: RegisterPage,
         meta: { guest: true },
     },
     {

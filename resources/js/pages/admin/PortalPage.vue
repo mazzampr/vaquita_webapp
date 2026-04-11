@@ -1,7 +1,8 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '../../stores/auth';
+import SuperAdminDashboard from './SuperAdminDashboard.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -23,6 +24,12 @@ const roleLabel = computed(() => {
     }
 });
 
+const showAdminDashboard = computed(() => {
+    const role = authStore.authUser?.role;
+
+    return role === 'super_admin' || role === 'admin';
+});
+
 async function handleLogout() {
     await authStore.logout();
     await router.push({ name: 'login' });
@@ -30,7 +37,16 @@ async function handleLogout() {
 </script>
 
 <template>
-    <main class="min-h-screen bg-slate-100 px-4 py-10">
+    <SuperAdminDashboard
+        v-if="showAdminDashboard"
+        :user-name="authStore.authUser?.name ?? 'Admin'"
+        :role-label="roleLabel"
+        @logout="handleLogout"
+    />
+    <main
+        v-else
+        class="min-h-screen bg-slate-100 px-4 py-10"
+    >
         <section class="mx-auto max-w-3xl rounded-xl bg-white p-8 shadow-lg">
             <p class="text-sm font-medium text-cyan-700">
                 Login berhasil
@@ -43,7 +59,7 @@ async function handleLogout() {
             </p>
 
             <div class="mt-8 rounded-lg bg-slate-100 p-4 text-sm text-slate-700">
-                Halaman ini adalah placeholder redirect role untuk MVP FEAT-026.
+                Dashboard khusus role ini belum dislice.
             </div>
 
             <button

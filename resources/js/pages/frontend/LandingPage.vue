@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import heroImg from '../hero.png';
+import heroImg from '../../hero.png';
 
 // Lucide icons (only page-specific ones; component-level icons live in their own files)
 import {
@@ -16,13 +16,13 @@ import {
 } from 'lucide-vue-next';
 
 // Reusable UI components
-import VNavbar from '../components/ui/VNavbar.vue';
-import VBtn from '../components/ui/VBtn.vue';
-import VBadge from '../components/ui/VBadge.vue';
-import VTestimonialCard from '../components/ui/VTestimonialCard.vue';
-import VPricingCard from '../components/ui/VPricingCard.vue';
-import VCoachCard from '../components/ui/VCoachCard.vue';
-import VFooter from '../components/ui/VFooter.vue';
+import VNavbar from '../../components/ui/VNavbar.vue';
+import VBtn from '../../components/ui/VBtn.vue';
+import VBadge from '../../components/ui/VBadge.vue';
+import VTestimonialCard from '../../components/ui/VTestimonialCard.vue';
+import VPricingCard from '../../components/ui/VPricingCard.vue';
+import VCoachCard from '../../components/ui/VCoachCard.vue';
+import VFooter from '../../components/ui/VFooter.vue';
 
 // ── Page Data ────────────────────────────────
 

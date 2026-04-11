@@ -44,7 +44,7 @@ defineProps({
                     >
                         Login
                     </router-link>
-                    <VBtn variant="primary" href="https://wa.me/6281510425560" external size="md" class="!px-6 !py-2.5 !shadow-none">Daftar Sekarang</VBtn>
+                    <VBtn variant="primary" :to="{ name: 'register' }" size="md" class="!px-6 !py-2.5 !shadow-none">Daftar Sekarang</VBtn>
                 </div>
 
                 <!-- Mobile Menu -->
@@ -77,7 +77,7 @@ defineProps({
                     </a>
                     <hr class="border-slate-100">
                     <VBtn variant="outline" :to="{ name: 'login' }" size="md" class="w-full text-center">Login</VBtn>
-                    <VBtn variant="primary" href="https://wa.me/6281510425560" external size="md" class="w-full text-center" @click="open = false">Daftar Sekarang</VBtn>
+                    <VBtn variant="primary" :to="{ name: 'register' }" size="md" class="w-full text-center" @click="open = false">Daftar Sekarang</VBtn>
                 </div>
             </div>
         </Transition>
